@@ -2,24 +2,34 @@ import tcod as libtcod
 from tcod import color
 
 
-def render_all(con, entities, game_map, screen_width, screen_height, colors):
-    # Draw all the tiles in the game map
-    for y in range(game_map.height):
+def render_all(con, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors):
+    for y in range(game_map.height):        # Draw all the tiles in the game map
         for x in range(game_map.width):
+            visible = fov_map.fov[y][x]     #Makes an array of all the stuff inside our FOV
             wall = game_map.tiles[x][y].block_sight
-
-            if wall:
-                #libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
-                libtcod.console_set_default_foreground(con, colors.get('dark_wall'))
-                libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
-            else:
-                #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
-                libtcod.console_set_default_foreground(con, colors.get('dark_ground'))
-                libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
+            if visible:             #Computes FOV
+                if wall:
+                    libtcod.console_set_default_foreground(con, colors.get('light_wall'))
+                    libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
+                else:
+                    libtcod.console_set_default_foreground(con, colors.get('light_ground'))
+                    libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
+                game_map.tiles[x][y].explored = True
+            elif game_map.tiles[x][y].explored:
+                if wall:
+                    #libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET) <-- Solid background
+                    libtcod.console_set_default_foreground(con, colors.get('dark_wall'))
+                    libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
+                else:
+                    #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET) <-- Solid background
+                    libtcod.console_set_default_foreground(con, colors.get('dark_ground'))
+                    libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
+            
     
-    # Draw all entities in the list
-    for entity in entities:
-        draw_entity(con, entity)
+    
+    for entity in entities:         # Draw all entities in the list
+        if fov_map.fov[entity.y][entity.x]:
+            draw_entity(con, entity)
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 
