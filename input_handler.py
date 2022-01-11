@@ -1,5 +1,5 @@
 import tcod as libtcod
-
+#Used as a place for all of our controls
 def handle_keys(key):
     #movement keys
     if key.vk == libtcod.KEY_UP:
