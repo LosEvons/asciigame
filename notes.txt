@@ -1,0 +1,21 @@
+12.1.2022
+List of current features: 
+    - Simple arial10x10 graphics
+    - Arrow key movement, escape to exit, and RALT + Space to go fullscreen. All implemented through tcod.
+    - Player character "@" that can collide with walls "#". Walls have their blocing property set to True. Floors are "."
+    - /Rectangle.py just makes a rectangle shape, and can find it's own center and see if it's overlapping with other rectangles.
+    - Simple map generation. Creates different size rooms, and 1x1 hallways between them. All implemented in /game_map.py
+    - Rudimentary enemy placement. Randomizes amount per. room.
+    - Placeholder AI. The enemy just contemplates it's existence.
+    - You can kick them in the knickers. Right now it just prints out stuff. Includes a simple turn system.
+    - FOV algorithm provided by tcod.
+Experiments:
+    - Tried to make water. This font is pretty restrictive, so it probably needs to be changed. 
+        Didn't have time to flesh out the generation, but came pretty close. Definately a thing to look at.
+    - Tried to make circle rooms. Requires a bit more math than I first thought, but should be one of the first new mapgen features.
+    - To make biomes, there should be designated areas for different rooms/materials. Tried it today. A rudimentary test proved succesful.
+
+This project is still mainly following tcod guides, but after I finish a little bit more of the scaffholding, it starts to be possible and safe
+to start implementing new features and systems.
+################################################################################################################################################
+

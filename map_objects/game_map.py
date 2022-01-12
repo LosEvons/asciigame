@@ -21,7 +21,6 @@ class GameMap:
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room):
         rooms = [] #Array of all the rooms and their properties. Appaerntly in the form: (anchor_x, anchor_y, size_x, size_y)
         num_rooms = 0
-
         for r in range (max_rooms): #Generate the max amount of rooms
             # random width and height
             w = randint(room_min_size, room_max_size)
