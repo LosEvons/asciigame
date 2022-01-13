@@ -12,6 +12,7 @@ from render_functions import clear_all, render_all
 from map_objects.game_map import GameMap
 from fov_functions import initialize_fov, recompute_fov
 from game_state import GameStates
+from components.fighter import Fighter
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
@@ -40,7 +41,8 @@ def main():
    }
 
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
-    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True) #Initializing the player
+    fighter_component = Fighter(hp=10, defense=2, power=5) #Basically creates a fighter class. Is responsible for the different attributes
+    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True, fighter=fighter_component) #Initializing the player
     entities = [player] #List of all the entities
     game_map = GameMap(map_width, map_height) #Initialize the game map
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room) #Generate the map
@@ -96,8 +98,8 @@ def main():
         #Enemy turn logic
         if game_state == GameStates.ENEMY_TURN: 
             for entity in entities:
-                if entity != player and fov_map.fov[entity.y][entity.x]:
-                    print("The {} ponders the meaning of it's existence.".format(entity.name))
+                if entity.ai:
+                    entity.ai.take_turn(player, fov_map, game_map, entities)
             
             game_state = GameStates.PLAYERS_TURN
 

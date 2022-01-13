@@ -17,5 +17,8 @@ Experiments:
 
 This project is still mainly following tcod guides, but after I finish a little bit more of the scaffholding, it starts to be possible and safe
 to start implementing new features and systems.
+
+Started to make a simple combat system with hp, defense and power. Currently it's left in a state, where it should work, but it's waiting
+for some simple AI mechanics.
 ################################################################################################################################################
 
