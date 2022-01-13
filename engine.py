@@ -80,7 +80,7 @@ def main():
             if not game_map.is_blocked(player.x + dx, player.y + dy):
                 destination_x = player.x + dx
                 destination_y = player.y + dy
-                target = Entity.get_blocking_entities_at_location(entities, destination_x, destination_y)
+                target = player.get_blocking_entities_at_location(entities, destination_x, destination_y)
                 if target:
                     print("You kick the {} in the shins, much to its annoyance!".format(target.name))
                 else:

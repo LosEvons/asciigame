@@ -1,4 +1,3 @@
-from components import ai
 from components.ai import BasicMonster
 from components.fighter import Fighter
 from map_objects.tile import Tile
@@ -85,16 +84,17 @@ class GameMap:
 
     def place_entities(self, room, entities, max_monsters_per_room): #Randomly decides a place in the room for our monsters
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
-        ai_component = BasicMonster()
         for i in range(number_of_monsters): #Iterate through all the monsters
             x = randint(room.x1 + 1, room.x2 - 1)
             y = randint(room.y1 + 1, room.y2 - 1)
 
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
                 if randint(0, 100) < 80: #We randomize between two different monsters
+                    ai_component = BasicMonster()
                     fighter_component = Fighter(hp=10, defense=0, power=3)
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, "Goblin" + str(self.unique_id), blocks=True, fighter=fighter_component, ai=ai_component)
                 else:
+                    ai_component = BasicMonster()
                     fighter_component = Fighter(hp=16, defense=1, power=4)
                     monster = Entity(x, y, 'T', libtcod.darker_green, "Hydra" + str(self.unique_id), blocks=True, fighter=fighter_component, ai=ai_component)
 
