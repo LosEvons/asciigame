@@ -1,5 +1,7 @@
 import math
 
+import tcod as libtcod
+
 class Entity:
     """
     A generic object to represent players, enemise, items, etc.
@@ -37,6 +39,32 @@ class Entity:
             self.get_blocking_entities_at_location(entities, self.x + dx, self.y + dy)):
             self.move(dx, dy)
 
+    def move_astar(self, target, entities, game_map):
+        fov = libtcod.map_new(game_map.width, game_map.height) #A new fov map used by a more robust pathfinding algorithm - https://en.wikipedia.org/wiki/A*_search_algorithm
+        for y1 in range(game_map.height):
+            for x1 in range(game_map.width):
+                fov.transparent[y1][x1] = not game_map.tiles[x1][y1].block_sight
+                fov.walkable[y1][x1] = not game_map.tiles[x1][y1].blocked
+            
+        for entity in entities:
+            if entity.blocks and entity != self and entity != target:
+                fov.transparent[entity.y][entity.x] = True
+                fov.walkable[y1][x1] = False
+
+        my_path = libtcod.path_new_using_map(fov, 1.41) #Creates a new path. 1.41 affects how the algorithm sees the cost of diagonal and cardinal movement to be.
+
+        libtcod.path_compute(my_path, self.x, self.y, target.x, target.y)
+
+        if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 25:
+            x, y = libtcod.path_walk(my_path, True)
+            if x or y:
+                self.x = x
+                self.y = y
+        else:
+            self.move_towards(target.x, target.y, game_map, entities)
+
+        libtcod.path_delete(my_path)
+    
     def distance_to(self, other): 
         dx = other.x - self.x
         dy = other.y - self.y
