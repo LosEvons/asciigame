@@ -2,17 +2,20 @@
 import sys
 import os
 
+
+
 os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import glob
-
 import tcod as libtcod
 from entity import Entity
 from input_handler import handle_keys
-from render_functions import clear_all, render_all
+from render_functions import clear_all, render_all, RenderOrder
 from map_objects.game_map import GameMap
 from fov_functions import initialize_fov, recompute_fov
 from game_state import GameStates
 from components.fighter import Fighter
+from death_functions import kill_monster, kill_player
+from game_messages import MessageLog
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
@@ -32,6 +35,14 @@ def main():
     fov_light_walls = True #Is FOV used to affect the visibility of things
     fov_radius = 10 
 
+    bar_width = 20
+    panel_height = 7                        #Player health bar properties
+    panel_y = screen_height - panel_height
+
+    message_x = bar_width + 2
+    message_width = screen_width - bar_width - 2    #Message feed properties
+    message_height = panel_height - 1
+
     #Some colors for current and later use
     colors = {
        'dark_wall': libtcod.Color(50, 50, 50),
@@ -42,7 +53,7 @@ def main():
 
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
     fighter_component = Fighter(hp=10, defense=2, power=5) #Basically creates a fighter class. Is responsible for the different attributes
-    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True, fighter=fighter_component) #Initializing the player
+    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component) #Initializing the player
     entities = [player] #List of all the entities
     game_map = GameMap(map_width, map_height) #Initialize the game map
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room) #Generate the map
@@ -50,19 +61,22 @@ def main():
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD) #Configuring the font
     libtcod.console_init_root(screen_width, screen_height, "libtcode game", False) # Configuring the game window/console
     con = libtcod.console_new(screen_width, screen_height) #Initializing the game window/console
+    panel = libtcod.console_new(screen_width, panel_height)
 
     key = libtcod.Key() #See if a key is pressed
     mouse = libtcod.Mouse() #See if mouse is used
 
     fov_map = initialize_fov(game_map) #Initial state of the fov
+    message_log = MessageLog(message_x, message_width, message_height)
     game_state = GameStates.PLAYERS_TURN #Gives the initiative to the player
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse) #Check for keypresses
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
-        render_all(con, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors)
+        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, 
+            bar_width, panel_height, panel_y, mouse, colors)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -102,9 +116,14 @@ def main():
             message = player_turn_result.get("message")
             dead_entity = player_turn_result.get("dead")
             if message:
-                print(message)
+                message_log.add_message(message)
             if dead_entity:
-                pass #next step
+                if dead_entity == player:
+                    message, game_state = kill_player(dead_entity)
+                else:
+                    message = kill_monster(dead_entity)
+                
+                message_log.add_message(message)
 
         #Enemy turn logic
         if game_state == GameStates.ENEMY_TURN:
@@ -117,13 +136,22 @@ def main():
                         dead_entity = enemy_turn_result.get("dead")
 
                         if message:
-                            print(message)
+                            message_log.add_message(message)
                         if dead_entity:
-                            pass
+                            if dead_entity == player:
+                                message, game_state = kill_player(dead_entity)
+                            else:
+                                message = kill_monster(dead_entity)
+                            
+                            message_log.add_message(message)
+
+                if game_state == GameStates.PLAYER_DEAD:
+                    break            
+            if game_state == GameStates.PLAYER_DEAD:
+                break
 
             else:
                 game_state = GameStates.PLAYERS_TURN
-
 
 if __name__ == "__main__":
     main()

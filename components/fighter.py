@@ -1,3 +1,6 @@
+import tcod as libtcod
+from game_messages import Message
+
 class Fighter: #Can be used to define an entitys parameters
     def __init__(self, hp, defense, power):
         self.max_hp = hp
@@ -21,11 +24,11 @@ class Fighter: #Can be used to define an entitys parameters
         
         if damage > 0:
             results.append({
-                "message":"{} attacks {} for {} hit points.".format(
-                self.owner.name.capitalize(), target.name, damage)})
+                "message":Message("{} attacks {} for {} hit points.".format(
+                self.owner.name.capitalize(), target.name, damage), libtcod.white)})
             results.extend(target.fighter.take_damage(damage))
         else:
             results.append({
-                "message":"{} attakcs {} but does no damage.".format(self.owner.name.capitalize(), target.name)})
+                "message":Message("{} attakcs {} but does no damage.".format(self.owner.name.capitalize(), target.name), libtcod.white)})
 
         return results

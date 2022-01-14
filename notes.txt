@@ -22,3 +22,21 @@ Started to make a simple combat system with hp, defense and power. Currently it'
 for some simple AI mechanics.
 ################################################################################################################################################
 
+14.1.2022
+There was a weird issue relating from the get_entity_at_target_location() function either not having the self attribute and/or me calling the function
+as Entity instead of player (a specific kind of entity). That was fixed. After that implemented simple combat and pathfinding. Also changed how information is
+handled. Instead of individual prints at every step, we create a list of all the events we are interested in, and handle later in one go.
+The algorithm used is A*, for which tcod has tools ready to use. 
+
+In the near future i'm going to finish the death mechanics and start working on the UI. Possibly going to look into changing tilesets, but that's a secondary issue.
+
+Going to also try to add some more commentary to the code I wrote yesterday, so I don't forget what it does.
+
+The task list is right now as follows:
+    1. Finnish the tutorial (foundation for all common features)
+    2. Tweak graphics
+    3. Tweak map generation
+    4. Start creating (create or adapt a combat system and maybe try generating some quest through AI.)
+
+Note to self: skim the tcod docu at some point, 'cause there seems to be quite a few inconsistencies between what is taught and what is
+recommended by the actual devs.

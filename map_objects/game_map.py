@@ -5,6 +5,7 @@ from map_objects.rectangle import Rect
 from random import randint
 import tcod as libtcod
 from entity import Entity
+from render_functions import RenderOrder
 """
 This is used to generate the game map.
 """
@@ -92,11 +93,13 @@ class GameMap:
                 if randint(0, 100) < 80: #We randomize between two different monsters
                     ai_component = BasicMonster()
                     fighter_component = Fighter(hp=10, defense=0, power=3)
-                    monster = Entity(x, y, 'o', libtcod.desaturated_green, "Goblin" + str(self.unique_id), blocks=True, fighter=fighter_component, ai=ai_component)
+                    monster = Entity(x, y, 'o', libtcod.desaturated_green, "Goblin" + str(self.unique_id), blocks=True, 
+                        render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 else:
                     ai_component = BasicMonster()
                     fighter_component = Fighter(hp=16, defense=1, power=4)
-                    monster = Entity(x, y, 'T', libtcod.darker_green, "Hydra" + str(self.unique_id), blocks=True, fighter=fighter_component, ai=ai_component)
+                    monster = Entity(x, y, 'T', libtcod.darker_green, "Hydra" + str(self.unique_id), blocks=True, 
+                        render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
                 entities.append(monster) #Add the monster to our list of entities
                 self.unique_id += 1 #Give every monster a unique id. Might come in clutch later.
