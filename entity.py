@@ -78,6 +78,9 @@ class Entity:
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
 
+    def distance(self, x, y):
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def get_blocking_entities_at_location(self, entities, destination_x, destination_y): #Finds any entities at a location, and checks if they are supposed to block the player.
         for entity in entities:                                                    #Takes the predicted location of a moving entity.
             if entity.blocks and entity.x == destination_x and entity.y == destination_y:
