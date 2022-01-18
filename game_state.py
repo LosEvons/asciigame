@@ -1,5 +1,5 @@
 from enum import Enum
-#Used to keep track of a turn system and initiative
+#keeps track of game state. What is active, and what is not.
 class GameStates(Enum):
     PLAYERS_TURN = 1
     ENEMY_TURN = 2
@@ -7,3 +7,5 @@ class GameStates(Enum):
     SHOW_INVENTORY = 4
     DROP_INVENTORY = 5
     TARGETING = 6
+    LEVEL_UP = 7
+    CHARACTER_SCREEN = 8

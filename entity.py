@@ -8,7 +8,7 @@ class Entity:
     """
     def __init__(self, x, y, char, color, name, blocks=False,
         render_order = RenderOrder.CORPSE, fighter=None, ai=None,
-        item=None, inventory=None): #Entities do not block or have any ai-script by default
+        item=None, inventory=None, stairs=None, level=None): #Entities do not block or have any ai-script by default
         
         self.x = x
         self.y = y
@@ -21,6 +21,8 @@ class Entity:
         self.render_order = render_order #When is the entity rendered (so things don't disappear under each other so much)
         self.item = item
         self.inventory = inventory
+        self.stairs = stairs
+        self.level = level
 
         if self.fighter:
             self.fighter.owner = self
@@ -30,6 +32,10 @@ class Entity:
             self.item.owner = self
         if self.inventory:
             self.inventory.owner = self
+        if self.stairs:
+            self.stairs.owner = self
+        if self.level:
+            self.level.owner = self
 
     def move(self, dx, dy): #Used to move stuff. Takes a change in coordinates.
         self.x += dx

@@ -1,12 +1,13 @@
 import tcod as libtcod
 from enum import Enum
 from game_state import GameStates
-from menus import inventory_menu
+from menus import character_screen, inventory_menu, level_up_menu
 
 class RenderOrder(Enum):
-    CORPSE = 1
+    STAIRS = 1
     ITEM = 2
-    ACTOR = 3
+    CORPSE = 3
+    ACTOR = 4
 
 
 def get_names_under_mouse(mouse, entities, fov_map): #Displays the name of stuff under our mouse on the UI.
@@ -59,7 +60,7 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
     
     for entity in entities_in_render_order:         # Draw all entities in the list
-        if fov_map.fov[entity.y][entity.x]: #If it's in our fov-range
+        if fov_map.fov[entity.y][entity.x] or (entity.stairs and game_map.tiles[entity.x][entity.y].explored): #If it's in our fov-range
             draw_entity(con, entity)
 
     libtcod.console_set_default_background(panel, libtcod.black)#Sets the UI background as black
@@ -67,6 +68,8 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
     render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_red) #Draws the hp bar
+
+    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, "Dungeon level: {}".format(game_map.dungeon_level))
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,  #Draws stuff in the ui when enemy is moused over
@@ -86,14 +89,21 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y) #Draws our UI element into the console
 
     inventory_title = None
-    if game_state == GameStates.SHOW_INVENTORY:
-        inventory_title = "Press the key next to an item to use it, or Esc to cancel.\n"
-    elif game_state == GameStates.DROP_INVENTORY:
-        inventory_title = "Press the key next to an item to drop it, or Esc to cancel.\n"
+    if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
+        if game_state == GameStates.SHOW_INVENTORY:
+            inventory_title = "Press the key next to an item to use it, or Esc to cancel.\n"
+        elif game_state == GameStates.DROP_INVENTORY:
+            inventory_title = "Press the key next to an item to drop it, or Esc to cancel.\n"
 
-    if inventory_title != None:
-        inventory_menu(con, inventory_title,
-            player.inventory, 50, screen_width, screen_height)
+        inventory_menu(con, inventory_title, player.inventory, 50, screen_width, screen_height)
+
+    if game_state == GameStates.LEVEL_UP:
+        level_up_menu(con, "Level up! Choose a stat to raise:", player, 40, 
+            screen_width, screen_height)
+
+    if game_state == GameStates.CHARACTER_SCREEN:
+        character_screen(player, 30, 10, screen_width, screen_height)
+
 
 
 def clear_all(con, entities): #Removes all entities one by one. Might become a source of performance issues. Otherwise we'd also see the previously drawn entities, and this would become an mspaint knockoff.
