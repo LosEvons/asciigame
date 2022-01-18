@@ -40,3 +40,10 @@ The task list is right now as follows:
 
 Note to self: skim the tcod docu at some point, 'cause there seems to be quite a few inconsistencies between what is taught and what is
 recommended by the actual devs.
+
+##############################################################################################################################################
+
+18.1.2022
+
+There was a weird issue with the function that determines which keybinds we use in which gamestate. For some reason a simple syntax change fixed it all. Somehow the inventory was
+activating every time another UI element did. And everything worked fine, until I implemented the lvlup system, which didn't play ball for some reason.
