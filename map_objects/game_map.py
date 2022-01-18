@@ -6,6 +6,8 @@ from random import randint
 import tcod as libtcod
 from entity import Entity
 from render_functions import RenderOrder
+from components.item import Item
+from item_functions import heal
 """
 This is used to generate the game map.
 """
@@ -22,7 +24,8 @@ class GameMap:
 
         return tiles
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, 
+        max_monsters_per_room, max_items_per_room):
         rooms = [] #Array of all the rooms and their properties. Appaerntly in the form: (anchor_x, anchor_y, size_x, size_y)
         num_rooms = 0
         for r in range (max_rooms): #Generate the max amount of rooms
@@ -56,7 +59,7 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                self.place_entities(new_room, entities, max_monsters_per_room) #Here we generate entities for each room
+                self.place_entities(new_room, entities, max_monsters_per_room, max_items_per_room) #Here we generate entities for each room
                 rooms.append(new_room) #Finally we add the room to our index and mark it in the room counter
                 num_rooms += 1
 
@@ -83,8 +86,10 @@ class GameMap:
 
         return False
 
-    def place_entities(self, room, entities, max_monsters_per_room): #Randomly decides a place in the room for our monsters
+    def place_entities(self, room, entities, max_monsters_per_room, max_items_per_room): #Randomly decides a place in the room for our monsters
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
+        number_of_items = randint(0, max_items_per_room)
+
         for i in range(number_of_monsters): #Iterate through all the monsters
             x = randint(room.x1 + 1, room.x2 - 1)
             y = randint(room.y1 + 1, room.y2 - 1)
@@ -104,3 +109,13 @@ class GameMap:
                 entities.append(monster) #Add the monster to our list of entities
                 self.unique_id += 1 #Give every monster a unique id. Might come in clutch later.
                     
+        for i in range(number_of_items):
+            x = randint(room.x1 + 1, room.x2 - 1)
+            y = randint(room.y1 + 1, room .y2 - 1)
+            item_component = Item(use_function=heal, amount=4)
+
+            if not any ([entity for entity in entities if entity.x == x and entity.y == y]):
+                item = Entity(x, y, '!', libtcod.violet, "HealingPotion", render_order=RenderOrder.ITEM,
+                    item=item_component)
+
+                entities.append(item)

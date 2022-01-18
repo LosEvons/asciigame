@@ -2,8 +2,6 @@
 import sys
 import os
 
-
-
 os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import glob
 import tcod as libtcod
@@ -15,7 +13,8 @@ from fov_functions import initialize_fov, recompute_fov
 from game_state import GameStates
 from components.fighter import Fighter
 from death_functions import kill_monster, kill_player
-from game_messages import MessageLog
+from game_messages import MessageLog, Message
+from components.inventory import Inventory
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
@@ -30,6 +29,7 @@ def main():
     room_min_size = 6
     max_rooms = 30
     max_monsters_per_room = 3
+    max_items_per_room = 2
 
     fov_algorithm = 2 #FOV-algorithm used - http://www.roguebasin.com/index.php?title=Comparative_study_of_field_of_view_algorithms_for_2D_grid_based_worlds
     fov_light_walls = True #Is FOV used to affect the visibility of things
@@ -52,16 +52,19 @@ def main():
    }
 
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
-    fighter_component = Fighter(hp=10, defense=2, power=5) #Basically creates a fighter class. Is responsible for the different attributes
-    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component) #Initializing the player
+    fighter_component = Fighter(hp=30, defense=2, power=5) #Basically creates a fighter class. Is responsible for the different attributes
+    inventory_component = Inventory(26) #We declare the size of a certain type of inventory
+    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
+        fighter=fighter_component, inventory=inventory_component) #Initializing the player
     entities = [player] #List of all the entities
     game_map = GameMap(map_width, map_height) #Initialize the game map
-    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room) #Generate the map
+    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, 
+        max_monsters_per_room, max_items_per_room) #Generate the map
 
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD) #Configuring the font
     libtcod.console_init_root(screen_width, screen_height, "libtcode game", False) # Configuring the game window/console
     con = libtcod.console_new(screen_width, screen_height) #Initializing the game window/console
-    panel = libtcod.console_new(screen_width, panel_height)
+    panel = libtcod.console_new(screen_width, panel_height) #We initialize the UI panel
 
     key = libtcod.Key() #See if a key is pressed
     mouse = libtcod.Mouse() #See if mouse is used
@@ -69,6 +72,7 @@ def main():
     fov_map = initialize_fov(game_map) #Initial state of the fov
     message_log = MessageLog(message_x, message_width, message_height)
     game_state = GameStates.PLAYERS_TURN #Gives the initiative to the player
+    previous_game_state = game_state
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
@@ -76,15 +80,19 @@ def main():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, 
-            bar_width, panel_height, panel_y, mouse, colors)
+            bar_width, panel_height, panel_y, mouse, colors, game_state)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
         
         #Movement handling (using the input_handler.py file)
-        action = handle_keys(key)           
+        action = handle_keys(key, game_state)           
 
         move = action.get("move")
+        pickup = action.get("pickup")
+        show_inventory = action.get("show_inventory")
+        drop_inventory = action.get("drop_inventory")
+        inventory_index = action.get("inventory_index")
         exit = action.get("exit")
         fullscreen = action.get("fullscreen")
         
@@ -106,15 +114,45 @@ def main():
 
             game_state = GameStates.ENEMY_TURN
 
+        if pickup and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.item and entity.x == player.x and entity.y == player.y:
+                    pickup_results = player.inventory.add_items(entity)
+                    player_turn_results.extend(pickup_results)
+                    break
+            else:
+                message_log.add_message(Message("There is nothing here to pick up.", libtcod.yellow))
+
+        if show_inventory:
+            previous_game_state = game_state
+            game_state = GameStates.SHOW_INVENTORY
+        if drop_inventory:
+            previous_game_state = game_state
+            game_state = GameStates.DROP_INVENTORY
+
+        if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(player.inventory.items):
+            item = player.inventory.items[inventory_index]
+            if game_state == GameStates.SHOW_INVENTORY:
+                player_turn_results.extend(player.inventory.use(item))
+            elif game_state == GameStates.DROP_INVENTORY:
+                player_turn_results.extend(player.inventory.drop_item(item))
+
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         if exit:
-            return True
+            if game_state == GameStates.SHOW_INVENTORY or GameStates.DROP_INVENTORY:
+                game_state = previous_game_state
+            else:
+                return True
 
-        for player_turn_result in player_turn_results:
+        for player_turn_result in player_turn_results: #Handles messages and killing player and monsters during player's turn
             message = player_turn_result.get("message")
             dead_entity = player_turn_result.get("dead")
+            item_added = player_turn_result.get("item_added")
+            item_consumed = player_turn_result.get("consumed")
+            item_dropped = player_turn_result.get("item_dropped")
+
             if message:
                 message_log.add_message(message)
             if dead_entity:
@@ -124,14 +162,22 @@ def main():
                     message = kill_monster(dead_entity)
                 
                 message_log.add_message(message)
+            if item_added:
+                entities.remove(item_added)
+                game_state = GameStates.ENEMY_TURN
+            if item_consumed:
+                game_state == GameStates.ENEMY_TURN
+            if item_dropped:
+                entities.append(item_dropped)
+                game_state = GameStates.ENEMY_TURN
 
         #Enemy turn logic
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
                 if entity.ai:
-                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
+                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities) #Enemy takes their turn
 
-                    for enemy_turn_result in enemy_turn_results:
+                    for enemy_turn_result in enemy_turn_results: #Handles messages and death during enemy's turn
                         message = enemy_turn_result.get("message")
                         dead_entity = enemy_turn_result.get("dead")
 
@@ -145,7 +191,7 @@ def main():
                             
                             message_log.add_message(message)
 
-                if game_state == GameStates.PLAYER_DEAD:
+                if game_state == GameStates.PLAYER_DEAD: #Apparently you need two of these here. Haven't bothered to investigate why, Probably to my own cost.
                     break            
             if game_state == GameStates.PLAYER_DEAD:
                 break

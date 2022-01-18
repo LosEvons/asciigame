@@ -7,7 +7,8 @@ class Entity:
     A generic object to represent players, enemise, items, etc.
     """
     def __init__(self, x, y, char, color, name, blocks=False,
-        render_order = RenderOrder.CORPSE, fighter=None, ai=None): #Entities do not block or have any ai-script by default
+        render_order = RenderOrder.CORPSE, fighter=None, ai=None,
+        item=None, inventory=None): #Entities do not block or have any ai-script by default
         
         self.x = x
         self.y = y
@@ -15,21 +16,27 @@ class Entity:
         self.color = color
         self.name = name
         self.blocks = blocks
-        self.fighter = fighter
-        self.ai = ai
-        self.render_order = render_order
-          
+        self.fighter = fighter  #Defines class
+        self.ai = ai #Defines ai script
+        self.render_order = render_order #When is the entity rendered (so things don't disappear under each other so much)
+        self.item = item
+        self.inventory = inventory
+
         if self.fighter:
             self.fighter.owner = self
         if self.ai:
             self.ai.owner = self
+        if self.item:
+            self.item.owner = self
+        if self.inventory:
+            self.inventory.owner = self
 
     def move(self, dx, dy): #Used to move stuff. Takes a change in coordinates.
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map, entities):
-        dx = target_x - self.x
+    def move_towards(self, target_x, target_y, game_map, entities): #Used to move stuff towards a point. 
+        dx = target_x - self.x                                      #Calculates a very simple route to a point, and avoids blocking objects on it's way there.
         dy = target_y - self.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
 
@@ -47,16 +54,16 @@ class Entity:
                 fov.transparent[y1][x1] = not game_map.tiles[x1][y1].block_sight
                 fov.walkable[y1][x1] = not game_map.tiles[x1][y1].blocked
             
-        for entity in entities:
+        for entity in entities: #Makes other entities transparent to better pathfinding.
             if entity.blocks and entity != self and entity != target:
                 fov.transparent[entity.y][entity.x] = True
                 fov.walkable[y1][x1] = False
 
         my_path = libtcod.path_new_using_map(fov, 1.41) #Creates a new path. 1.41 affects how the algorithm sees the cost of diagonal and cardinal movement to be.
 
-        libtcod.path_compute(my_path, self.x, self.y, target.x, target.y)
+        libtcod.path_compute(my_path, self.x, self.y, target.x, target.y) #More computation for the path.
 
-        if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 25:
+        if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 25: #If path isn't empty and path isn't too long, allow movement.
             x, y = libtcod.path_walk(my_path, True)
             if x or y:
                 self.x = x
@@ -64,9 +71,9 @@ class Entity:
         else:
             self.move_towards(target.x, target.y, game_map, entities)
 
-        libtcod.path_delete(my_path)
+        libtcod.path_delete(my_path) #Deletes path currently. We just make a new path every time. Might be a source of performance issues down the line.
     
-    def distance_to(self, other): 
+    def distance_to(self, other): #Pythagorean theorem. Calculates the lenght of the hypotenuse.
         dx = other.x - self.x
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)

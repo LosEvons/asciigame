@@ -8,7 +8,7 @@ class Fighter: #Can be used to define an entitys parameters
         self.defense = defense
         self.power = power
 
-    def take_damage(self, amount):
+    def take_damage(self, amount): #Player takes damage. Pretty simple math, and a check for 0hp
         results = []
 
         self.hp -= amount
@@ -18,7 +18,12 @@ class Fighter: #Can be used to define an entitys parameters
         
         return results
 
-    def attack(self, target):
+    def heal(self, amount):
+        self.hp += amount
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
+    def attack(self, target): #Deals damage calculations and generates messages accordingly
         results = []
         damage = self.power - target.fighter.defense
         
