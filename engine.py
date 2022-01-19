@@ -257,9 +257,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     equipped = equip_result.get("equipped")
                     dequipped = equip_result.get("dequipped")
                     if equipped:
-                        message_log.add_message(Message("You equipped the {}", format(equipped.name)))
+                        message_log.add_message(Message("You equipped the {}".format(equipped.name)))
                     if dequipped:
-                        message_log.add_message(Message("You dequipped the {]".format(dequipped.name)))
+                        message_log.add_message(Message("You dequipped the {}".format(dequipped.name)))
                 game_state = GameStates.ENEMY_TURN
             if targeting:
                 previous_game_state = GameStates.PLAYERS_TURN
