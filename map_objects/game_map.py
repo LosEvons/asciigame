@@ -1,5 +1,8 @@
+from components.equipment import Equipment
+from components.equippable import Equippable
 from components.ai import BasicMonster
 from components.fighter import Fighter
+from equipment_slots import EquipmentSlots
 from game_messages import Message
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
@@ -131,7 +134,9 @@ class GameMap:
             "healing_potion":70, 
             "lightning_scroll":from_dungeon_level([[25, 4]], self.dungeon_level), 
             "fireball_scroll":from_dungeon_level([[25, 6]], self.dungeon_level), 
-            "confusion_scroll":from_dungeon_level([[25, 2]], self.dungeon_level)
+            "confusion_scroll":from_dungeon_level([[25, 2]], self.dungeon_level),
+            "sword":from_dungeon_level([[5, 4]], self.dungeon_level),
+            "shield":from_dungeon_level([[15, 0]], self.dungeon_level)
             }
 
         for i in range(number_of_monsters): #Iterate through all the monsters
@@ -142,12 +147,12 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
                 if monster_choice == "goblin": #We randomize between two different monsters
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(hp=10, defense=0, power=3, xp=35)
+                    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, "Goblin" + str(self.unique_id), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(hp=16, defense=1, power=4, xp=100)
+                    fighter_component = Fighter(hp=30, defense=1, power=9, xp=100)
                     monster = Entity(x, y, 'T', libtcod.darker_green, "Hydra" + str(self.unique_id), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
@@ -162,7 +167,7 @@ class GameMap:
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]):
                 item_choice = random_choice_from_dict(item_chances)
                 if item_choice == "healing_potion":
-                    item_component = Item(use_function=heal, amount=4)
+                    item_component = Item(use_function=heal, amount=40)
                     item = Entity(x, y, '!', libtcod.violet, "Healing Potion", render_order=RenderOrder.ITEM,
                         item=item_component)
                 elif item_choice == "fireball_scroll":
@@ -180,5 +185,13 @@ class GameMap:
                     item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
                     item = Entity(x, y, '?', libtcod.yellow, "Lightning Scroll", render_order=RenderOrder.ITEM,
                         item=item_component)
+                elif item_choice == "sword":
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+                    item = Entity(x, y, "/", libtcod.sky, "Sword", render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                elif item_choice == "shield":
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, defense_bonus=1)
+                    item = Entity(x, y, "[", libtcod.darker_orange, "Shield", render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
 
                 entities.append(item)

@@ -2,21 +2,30 @@ import tcod as libtcod
 
 from entity import Entity
 from components.fighter import Fighter
+from components.equipment import Equipment
 from game_messages import MessageLog
 from game_state import GameStates
 from components.inventory import Inventory
 from components.level import Level
+from components.equippable import Equippable
+from equipment_slots import EquipmentSlots
 from map_objects.game_map import GameMap
 from render_functions import RenderOrder
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=30, defense=2, power=5)
+    fighter_component = Fighter(hp=100, defense=1, power=2)
     inventory_component = Inventory(26)
     level_component = Level()
-
+    equipment_component = Equipment()
     player = Entity(0, 0, '@', libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
-        fighter=fighter_component, inventory=inventory_component, level=level_component) #Initializing the player
+        fighter=fighter_component, inventory=inventory_component, level=level_component,
+        equipment=equipment_component) #Initializing the player
     entities = [player] #List of all the entities
+    
+    equipment_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    dagger = Entity(0, 0, '-', libtcod.sky, "Dagger", equippable=equipment_component)
+    player.inventory.add_items(dagger)
+    player.equipment.toggle_equip(dagger)
 
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
     game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
