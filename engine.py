@@ -26,17 +26,8 @@ def main():
     libtcod.console_init_root(constants["screen_width"], 
         constants["screen_height"], "libtcode game", False) # Configuring the game window/console
 
-<<<<<<< HEAD
-    fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
-    fighter_component = Fighter(hp=30, defense=2, power=5) #Basically creates a fighter class. Is responsible for the different attributes
-    player = Entity(int(screen_width / 2), int(screen_height/2), '@', libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, fighter=fighter_component) #Initializing the player
-    entities = [player] #List of all the entities
-    game_map = GameMap(map_width, map_height) #Initialize the game map
-    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities, max_monsters_per_room) #Generate the map
-=======
     con = libtcod.console_new(constants["screen_width"], constants["screen_height"]) #Initializing the game window/console
     panel = libtcod.console_new(constants["screen_width"], constants["panel_height"]) #We initialize the UI panel
->>>>>>> dev
 
     player = None
     entities = []
