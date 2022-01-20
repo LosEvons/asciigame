@@ -1,4 +1,8 @@
 import tcod as libtcod
+import os
+os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
+import sys
+import json
 
 from entity import Entity
 from components.fighter import Fighter
@@ -35,7 +39,9 @@ def get_game_variables(constants):
 
     game_state = GameStates.PLAYERS_TURN #Gives the initiative to the player
 
-    return player, entities, game_map, message_log, game_state
+    name_list = constants["name_list"]
+
+    return player, entities, game_map, message_log, game_state, name_list
 
 def get_constants():
     window_title = "Libtcod roguelike"
@@ -62,6 +68,8 @@ def get_constants():
     fov_light_walls = True
     fov_radius = 10
 
+    name_list = get_name_list()
+
     colors = {
        'dark_wall': libtcod.Color(50, 50, 50),
        'dark_ground': libtcod.Color(50, 50, 50),
@@ -87,7 +95,16 @@ def get_constants():
         "fov_algorithm":fov_algorithm,                  #Determines the fov algorithm used
         "fov_light_walls":fov_light_walls,              #Determines if the fov lights walls
         "fov_radius":fov_radius,                        #Size of FOV
-        "colors":colors                                 #A list of useful colors
+        "colors":colors,                                #A list of useful colors
+        "name_list":name_list                           #A list used for dynamic allocation of names to entities
     }
 
     return constants
+
+def get_name_list():
+    DATA_FOLDER = "data"
+    NAME_DATA_FILE = os.path.join(DATA_FOLDER, "name_data.json")
+    with open(NAME_DATA_FILE, "r") as DATA_FILE:
+        name_list = json.load(DATA_FILE)
+        return name_list
+

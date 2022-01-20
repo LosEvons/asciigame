@@ -23,3 +23,10 @@ def from_dungeon_level(table, dungeon_level):
         if dungeon_level >= level:
             return value
     return 0
+
+def roll (amount, sides):
+    results = []
+    for i in range(amount):
+        results.append(randint(1, sides))
+
+    return results

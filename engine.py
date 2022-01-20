@@ -34,6 +34,7 @@ def main():
     game_map = None
     message_log = None
     game_state = None
+    name_list = constants["name_list"]
 
     show_main_menu = True
     show_load_error_message = False
@@ -64,12 +65,12 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, name_list = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state = load_game()
+                    player, entities, game_map, message_log, game_state, name_list = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -78,11 +79,11 @@ def main():
         else:
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, panel, constants)
+                con, panel, constants, name_list)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, name_list):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -217,7 +218,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({"targeting_canceled":True})
             else:
-                save_game(player, entities, game_map, message_log, game_state)
+                save_game(player, entities, game_map, message_log, game_state, name_list)
 
 
                 return True
