@@ -1,7 +1,7 @@
 import tcod as libtcod
 import os
-os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import sys
+os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import json
 
 from entity import Entity
@@ -31,15 +31,15 @@ def get_game_variables(constants):
     player.inventory.add_items(dagger)
     player.equipment.toggle_equip(dagger)
 
+    name_list = constants["name_list"]
+
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
     game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
-        constants["map_width"], constants["map_height"], player, entities) #Generate the map
+        constants["map_width"], constants["map_height"], player, entities, name_list) #Generate the map
 
     message_log = MessageLog(constants["message_x"], constants["message_width"], constants["message_height"])
 
     game_state = GameStates.PLAYERS_TURN #Gives the initiative to the player
-
-    name_list = constants["name_list"]
 
     return player, entities, game_map, message_log, game_state, name_list
 
@@ -106,5 +106,5 @@ def get_name_list():
     NAME_DATA_FILE = os.path.join(DATA_FOLDER, "name_data.json")
     with open(NAME_DATA_FILE, "r") as DATA_FILE:
         name_list = json.load(DATA_FILE)
-        return name_list
+        return name_list[0]
 

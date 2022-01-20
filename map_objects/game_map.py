@@ -14,6 +14,7 @@ from components.item import Item
 from item_functions import cast_confusion, cast_fireball, cast_lightning, heal
 from components.stairs import Stairs
 from random_utils import from_dungeon_level, random_choice_from_dict
+from components.name import Name
 """
 This is used to generate the game map.
 """
@@ -32,7 +33,7 @@ class GameMap:
         return tiles
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, 
-        player, entities):
+        player, entities, name_list):
         rooms = [] #Array of all the rooms and their properties. Appaerntly in the form: (anchor_x, anchor_y, size_x, size_y)
         num_rooms = 0
 
@@ -73,7 +74,7 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                self.place_entities(new_room, entities) #Here we generate entities for each room
+                self.place_entities(new_room, entities, name_list) #Here we generate entities for each room
                 rooms.append(new_room) #Finally we add the room to our index and mark it in the room counter
                 num_rooms += 1
         stairs_component = Stairs(self.dungeon_level +1)
@@ -82,13 +83,13 @@ class GameMap:
             stairs=stairs_component)
         entities.append(down_stairs)
 
-    def next_floor(self, player, message_log, constants):
+    def next_floor(self, player, message_log, constants, name_list):
         self.dungeon_level += 1
         entities = [player]
 
         self.tiles = self.initialize_tiles()
         self.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"],
-            constants["map_width"], constants["map_height"], player, entities)
+            constants["map_width"], constants["map_height"], player, entities, name_list)
         
         player.fighter.heal(player.fighter.max_hp // 2)
 
@@ -119,7 +120,7 @@ class GameMap:
 
         return False
 
-    def place_entities(self, room, entities): #Randomly decides a place in the room for our monsters
+    def place_entities(self, room, entities, name_list): #Randomly decides a place in the room for our monsters
         max_monsters_per_room = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.dungeon_level)
         max_items_per_room = from_dungeon_level([[1, 1], [2, 4]], self.dungeon_level)
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
@@ -148,12 +149,12 @@ class GameMap:
                 if monster_choice == "goblin": #We randomize between two different monsters
                     ai_component = BasicMonster()
                     fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
-                    monster = Entity(x, y, 'o', libtcod.desaturated_green, "Goblin" + str(self.unique_id), blocks=True, 
+                    monster = Entity(x, y, 'o', libtcod.desaturated_green, Name(name_list, "goblin"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
                     ai_component = BasicMonster()
                     fighter_component = Fighter(hp=30, defense=1, power=9, xp=100)
-                    monster = Entity(x, y, 'T', libtcod.darker_green, "Hydra" + str(self.unique_id), blocks=True, 
+                    monster = Entity(x, y, 'T', libtcod.darker_green, Name(name_list, "hydra"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
                 entities.append(monster) #Add the monster to our list of entities
@@ -187,11 +188,11 @@ class GameMap:
                         item=item_component)
                 elif item_choice == "sword":
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
-                    item = Entity(x, y, "/", libtcod.sky, "Sword", render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, "/", libtcod.sky, Name(name_list, "sword"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
                 elif item_choice == "shield":
                     equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=1)
-                    item = Entity(x, y, "[", libtcod.darker_orange, "Shield", render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, "[", libtcod.darker_orange, Name(name_list, "shield"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
 
                 entities.append(item)
