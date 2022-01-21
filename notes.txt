@@ -55,3 +55,15 @@ activating every time another UI element did. And everything worked fine, until 
 Made a naming system. Learned to do some prototyping before you start playing too much with the code. Next up: keyboard targeting:
 
 We make a cursor entity. That cursor will display the name of anything that's under it, and when targetting, activate the item. Only thing needed is the entity.
+
+So, now we have a cursor that can be used in targetting and as an independent look-tool. Next up: implementing combat.
+
+We have six attributes: str, dex, con, int, wis, cha. We have those and their respective modifiers stored in a class called CharacterSheet.
+The character sheet is a property of any Fighter class. Now we need to figure out how to merge items and ability scores there.
+A fighter currently has Power, Defense and HP. We need to make a system to first redefine:
+Power as [damage dice, weapon bonus] (die roll + bonus)
+Defense as 10 + constitution modifier
+HP as 8 + dexterity modifier
+
+I'm gonna fork here, and start playing around, and hope I can get it to work without rewriting too much, but I think we'll be alright.
+For starters I just need to give everyone a weapon, or just define lack of a weapon as some kind of unarmed combat.
