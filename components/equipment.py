@@ -18,28 +18,41 @@ class Equipment:
         return bonus
 
     @property
-    def defense_bonus(self):
+    def ac_bonus(self):
         bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
-            bonus += self.main_hand.equippable.defense_bonus
+            bonus += self.main_hand.equippable.ac_bonus
 
         if self.off_hand and self.off_hand.equippable:
-            bonus += self.off_hand.equippable.defense_bonus
+            bonus += self.off_hand.equippable.ac_bonus
         
         return bonus
 
     @property
-    def power_bonus(self):
-        bonus = 0
+    def damage_dice(self):
+        damage_dice = 0
 
         if self.main_hand and self.main_hand.equippable:
-            bonus += self.main_hand.equippable.power_bonus
+            damage_dice = self.main_hand.equippable.damage_dice
 
         if self.off_hand and self.off_hand.equippable:
-            bonus += self.off_hand.equippable.power_bonus
+            damage_dice = self.off_hand.equippable.damage_dice
         
-        return bonus
+        return damage_dice
+
+    @property
+    def damage_bonus(self):
+        damage_bonus = 0
+
+        if self.main_hand and self.main_hand.equippable:
+            damage_bonus = self.main_hand.equippable.damage_bonus
+
+        if self.off_hand and self.off_hand.equippable:
+            damage_bonus = self.off_hand.equippable.damage_bonus
+        
+        return damage_bonus
+
 
     def toggle_equip(self, equippable_entity):
         results = []

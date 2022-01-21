@@ -149,12 +149,12 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
                 if monster_choice == "goblin": #We randomize between two different monsters
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35, character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8))
+                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8))
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, Name(name_list, "goblin"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(hp=30, defense=1, power=9, xp=100, character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10))
+                    fighter_component = Fighter(character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10))
                     monster = Entity(x, y, 'T', libtcod.darker_green, Name(name_list, "hydra"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
@@ -188,11 +188,11 @@ class GameMap:
                     item = Entity(x, y, '?', libtcod.yellow, "Lightning Scroll", render_order=RenderOrder.ITEM,
                         item=item_component)
                 elif item_choice == "sword":
-                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2,8), damage_bonus=2)
                     item = Entity(x, y, "/", libtcod.sky, Name(name_list, "sword"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
                 elif item_choice == "shield":
-                    equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=1)
+                    equippable_component = Equippable(EquipmentSlots.OFF_HAND, ac_bonus=2)
                     item = Entity(x, y, "[", libtcod.darker_orange, Name(name_list, "shield"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
 

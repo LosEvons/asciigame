@@ -18,7 +18,7 @@ from render_functions import RenderOrder
 from components.character_sheet import CharacterSheet
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=100, defense=1, power=2, character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10))
+    fighter_component = Fighter(character_sheet=CharacterSheet(12, 12, 12, 12, 12, 12))
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
@@ -28,7 +28,7 @@ def get_game_variables(constants):
     cursor = Entity(50, 50, 'X', libtcod.light_red, "Cursor", render_order=RenderOrder.INVISIBLE)
     entities = [player, cursor] #List of all the entities
     
-    equipment_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    equipment_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2, 4), damage_bonus=1)
     dagger = Entity(0, 0, '-', libtcod.sky, "Dagger", equippable=equipment_component)
     player.inventory.add_items(dagger)
     player.equipment.toggle_equip(dagger)
