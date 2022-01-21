@@ -11,7 +11,7 @@ class Fighter:
         self.hp = self.base_max_hp
         self.base_ac = 10 + character_sheet.ability_modifiers.get("dex")
         self.xp = xp
-        self.unarmed_damage = 1, 4
+        self.unarmed_damage = [1, 4]
 
     @property
     def max_hp(self):
@@ -59,18 +59,26 @@ class Fighter:
 
     def attack(self, target):
         results = []
-        damage = self.damage_dice
 
-        results.append({"message":Message("{} rolled {} damage agains {}.".format(self.owner.name.capitalize(), damage, target.name), libtcod.white)})
+        attack_roll = sum(roll(1, 20))
 
-        if damage > 0:
-            results.append({
-                "message":Message("{} attacks {} for {} points.".format(
-                    self.owner.name.capitalize(), target.name, damage), libtcod.white)})
-            results.extend(target.fighter.take_damage(damage))
+        if attack_roll >= target.fighter.ac:
+            results.append({"message":Message("HIT: {} -> {} --to hit-> {} -> {}".format(
+                self.owner.name, attack_roll, target.fighter.ac, target.name))})
+            damage = self.damage_dice
+
+            if damage > 0:
+                results.append({
+                    "message":Message("{} -> {} --damage-> {} - {}".format(
+                        self.owner.name.capitalize(), damage, target.name, target.fighter.hp), libtcod.white)})
+                results.extend(target.fighter.take_damage(damage))
+            else:
+                results.append({
+                    "message":Message("{} -> {} --damage-> {} - {}".format(
+                        self.owner.name.capitalize(), damage, target.name, target.fighter.hp), libtcod.white)})
+
         else:
-            results.append({
-                "message":Message("{} attakcs {} but does no damage.".format(
-                    self.owner.name.capitalize(), target.name), libtcod.white)})
-
+            results.append({"message":Message("MISS: {} -> {} --to hit-> {} -> {}.".format(
+                self.owner.name, attack_roll, target.name, target.fighter.ac))})
+        
         return results

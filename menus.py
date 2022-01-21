@@ -77,8 +77,12 @@ def character_screen(player, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Experience to Level: {}".format(player.level.experience_to_next_level - player.level.current_xp))
     libtcod.console_print_rect_ex(window, 0, 5, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Max HP: {}".format(player.fighter.max_hp))
-    libtcod.console_print_rect_ex(window, 0, 6, char_screen_width, char_screen_height,
-        libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}+{}".format(player.equipment.damage_dice[0], player.equipment.damage_dice[1], player.equipment.damage_bonus))
+    if player.equipment:
+        libtcod.console_print_rect_ex(window, 0, 6, char_screen_width, char_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}+{}".format(player.equipment.damage_dice[0], player.equipment.damage_dice[1], player.equipment.damage_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 0, 6, char_screen_width, char_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}".format(player.fighter.unarmed_damage[0], player.fighter.unarmed_damage[1]))
     libtcod.console_print_rect_ex(window, 0, 7, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "AC: {}".format(player.fighter.ac))
 
