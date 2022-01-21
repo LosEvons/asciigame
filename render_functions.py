@@ -12,10 +12,11 @@ class RenderOrder(Enum):
     UI = 6
 
 
-def get_names_under_mouse(mouse, entities, fov_map): #Displays the name of stuff under our mouse on the UI.
-    (x, y) = (mouse.cx, mouse.cy) #Get mouse pos
+def get_names_under_mouse(mouse, entities, fov_map, cursor): #Displays the name of stuff under our mouse on the UI.
+    (x1, y1, x2, y2) = (mouse.cx, mouse.cy, cursor.x, cursor.y) #Get mouse pos
+
     names = [entity.name for entity in entities
-        if entity.x == x and entity.y == y and fov_map.fov[entity.y][entity.x]] #List of entity names if entities are visible and under our mouse
+        if entity.x == (x1 or x2) and entity.y == (y1 or y2) and fov_map.fov[entity.y][entity.x] and entity is not cursor] #List of entity names if entities are visible and under our mouse
     names = ", ".join(names)
 
     return names.capitalize()
@@ -34,7 +35,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
         libtcod.CENTER, "{}: {}/{}".format(name, value, maximum))
 
 def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
-    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state):
+    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor):
     if fov_recompute:
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
@@ -74,11 +75,11 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_grey) #Draws the hp bar
 
-    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, "Dungeon level: {}".format(game_map.dungeon_level))
+    libtcod.console_print_ex(panel, 2, 6, libtcod.BKGND_NONE, libtcod.LEFT, "Dungeon level: {}".format(game_map.dungeon_level))
 
-    libtcod.console_set_default_foreground(panel, libtcod.light_gray)
+    libtcod.console_set_default_foreground(panel, libtcod.white)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,  #Draws stuff in the ui when enemy is moused over
-        get_names_under_mouse(mouse, entities, fov_map))
+        get_names_under_mouse(mouse, entities, fov_map, cursor))
 
     y = 1
     for message in message_log.messages:

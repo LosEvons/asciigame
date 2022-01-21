@@ -13,6 +13,8 @@ def handle_keys(key, game_state): #Determines which control-scheme to use
         return handle_level_up_menu(key)
     elif game_state == GameStates.CHARACTER_SCREEN:
         return handle_character_screen(key)
+    elif game_state == GameStates.LOOK:
+        return handle_look_keys(key)
 
     return {}
 
@@ -75,6 +77,33 @@ def handle_targeting_keys(key):
     
     return {}
 
+def handle_look_keys(key):
+    key_char = chr(key.c)
+    if key.vk == libtcod.KEY_ESCAPE or key_char == 'q':
+        return {"look_cancel":True}
+
+    if key.vk == libtcod.KEY_UP or key_char == 'k' or key.vk == libtcod.KEY_KP8:
+        return {"cursor_move":(0,-1)}
+    elif key.vk == libtcod.KEY_DOWN or key_char == 'j' or key.vk == libtcod.KEY_KP2:
+        return {"cursor_move":(0,1)}
+    elif key.vk == libtcod.KEY_LEFT or key_char == 'h' or key.vk == libtcod.KEY_KP4:
+        return {"cursor_move":(-1,0)}
+    elif key.vk == libtcod.KEY_RIGHT or key_char == 'l' or key.vk == libtcod.KEY_KP6:
+        return {"cursor_move":(1,0)}
+    elif key_char == 'y' or key.vk == libtcod.KEY_KP7:
+        return {"cursor_move":(-1,-1)}
+    elif key_char == 'u' or key.vk == libtcod.KEY_KP9:
+        return {"cursor_move":(1,-1)}
+    elif key_char == 'b' or key.vk == libtcod.KEY_KP1:
+        return {"cursor_move":(-1,1)}
+    elif key_char == 'n' or key.vk == libtcod.KEY_KP3:
+        return {"cursor_move":(1,1)}
+    
+    elif key.vk == libtcod.KEY_ENTER:
+        return {"look_at":True}
+    
+    return {}
+
 def handle_mouse(mouse):
     (x, y) = (mouse.cx, mouse.cy)
 
@@ -134,6 +163,9 @@ def handle_player_turn_keys(key):
 
     if key_char == '<':
         return{"take_stairs":True}
+
+    if key_char == 'q':
+        return{"look":True}
 
     elif key_char == 'z':
         return {"wait":True}

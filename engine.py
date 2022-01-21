@@ -100,7 +100,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
-            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state)
+            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -122,12 +122,24 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         show_character_screen = action.get("show_character_screen")
         cursor_move = action.get("cursor_move")
         chosen_target = action.get("chosen_target")
+        look = action.get("look")
+        look_cancel = action.get("look_cancel")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
 
         #Player turn logic
         player_turn_results = []
+
+        if look:
+            previous_game_state = game_state
+            game_state = GameStates.LOOK
+            cursor.render_order = RenderOrder.UI
+            cursor.x, cursor.y = player.x, player.y
+    	
+        if look_cancel:
+            cursor.render_order = RenderOrder.INVISIBLE
+            game_state = previous_game_state
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
