@@ -6,7 +6,7 @@ os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] 
 import glob
 import tcod as libtcod
 from input_handler import handle_keys, handle_mouse, handle_main_menu
-from render_functions import clear_all, render_all
+from render_functions import RenderOrder, clear_all, render_all
 from fov_functions import initialize_fov, recompute_fov
 from game_state import GameStates
 from death_functions import kill_monster, kill_player
@@ -30,6 +30,7 @@ def main():
     panel = libtcod.console_new(constants["screen_width"], constants["panel_height"]) #We initialize the UI panel
 
     player = None
+    cursor = None
     entities = []
     game_map = None
     message_log = None
@@ -65,12 +66,12 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state, name_list = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, name_list, cursor = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state, name_list = load_game()
+                    player, entities, game_map, message_log, game_state, name_list, cursor = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -79,11 +80,11 @@ def main():
         else:
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, panel, constants, name_list)
+                con, panel, constants, name_list, cursor)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, name_list):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, name_list, cursor):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -119,6 +120,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         fullscreen = action.get("fullscreen")
         level_up = action.get("level_up")
         show_character_screen = action.get("show_character_screen")
+        cursor_move = action.get("cursor_move")
+        chosen_target = action.get("chosen_target")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -140,6 +143,10 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     player.move(dx, dy)
 
             game_state = GameStates.ENEMY_TURN
+        
+        if cursor_move:
+            dx, dy = cursor_move
+            cursor.move(dx, dy)
 
         elif wait:
             game_state = GameStates.ENEMY_TURN
@@ -178,8 +185,22 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     target_x=target_x, target_y=target_y)
 
                 player_turn_results.extend(item_use_results)
+                cursor.render_order = RenderOrder.INVISIBLE
                 game_state = previous_game_state
             elif right_click:
+                cursor.render_order = RenderOrder.INVISIBLE
+                game_state = previous_game_state
+
+            elif chosen_target:
+                cursor.render_order = RenderOrder.INVISIBLE
+                target_x, target_y = cursor.x, cursor.y
+                item_use_results = player.inventory.use(
+                    targeting_item,
+                    entities=entities,
+                    fov_map=fov_map,
+                    target_x=target_x, target_y=target_y)
+                
+                player_turn_results.extend(item_use_results)
                 game_state = previous_game_state
 
         if level_up:
@@ -218,7 +239,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({"targeting_canceled":True})
             else:
-                save_game(player, entities, game_map, message_log, game_state, name_list)
+                save_game(player, entities, game_map, message_log, game_state, name_list, cursor)
 
 
                 return True
@@ -265,6 +286,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             if targeting:
                 previous_game_state = GameStates.PLAYERS_TURN
                 game_state = GameStates.TARGETING
+                cursor.render_order = RenderOrder.UI
+                cursor.x, cursor.y = player.x, player.y
                 targeting_item = targeting
                 message_log.add_message(targeting_item.item.targeting_message)
             if targeting_canceled:

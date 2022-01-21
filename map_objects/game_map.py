@@ -1,3 +1,4 @@
+from components.character_sheet import CharacterSheet
 from components.equipment import Equipment
 from components.equippable import Equippable
 from components.ai import BasicMonster
@@ -134,8 +135,8 @@ class GameMap:
         item_chances = {
             "healing_potion":70, 
             "lightning_scroll":from_dungeon_level([[25, 4]], self.dungeon_level), 
-            "fireball_scroll":from_dungeon_level([[25, 6]], self.dungeon_level), 
-            "confusion_scroll":from_dungeon_level([[25, 2]], self.dungeon_level),
+            "fireball_scroll":from_dungeon_level([[25, 1]], self.dungeon_level), 
+            "confusion_scroll":from_dungeon_level([[25, 1]], self.dungeon_level),
             "sword":from_dungeon_level([[5, 4]], self.dungeon_level),
             "shield":from_dungeon_level([[15, 0]], self.dungeon_level)
             }
@@ -148,12 +149,12 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
                 if monster_choice == "goblin": #We randomize between two different monsters
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35)
+                    fighter_component = Fighter(hp=20, defense=0, power=4, xp=35, character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8))
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, Name(name_list, "goblin"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(hp=30, defense=1, power=9, xp=100)
+                    fighter_component = Fighter(hp=30, defense=1, power=9, xp=100, character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10))
                     monster = Entity(x, y, 'T', libtcod.darker_green, Name(name_list, "hydra"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 

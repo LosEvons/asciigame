@@ -2,12 +2,13 @@ import tcod as libtcod
 from game_messages import Message
 
 class Fighter: #Can be used to define an entitys parameters
-    def __init__(self, hp, defense, power, xp=0):
-        self.base_max_hp = hp
-        self.hp = hp
-        self.base_defense = defense
+    def __init__(self, hp, defense, power, xp=0, character_sheet=None):
+        self.base_max_hp = 8 + character_sheet.ability_modifiers.get("con")
+        self.hp = self.base_max_hp
+        self.base_defense = 10 + character_sheet.ability_modifiers.get("dex")
         self.base_power = power
         self.xp = xp
+        self.character_sheet = character_sheet
 
     @property
     def max_hp(self):

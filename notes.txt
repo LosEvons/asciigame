@@ -47,3 +47,11 @@ recommended by the actual devs.
 
 There was a weird issue with the function that determines which keybinds we use in which gamestate. For some reason a simple syntax change fixed it all. Somehow the inventory was
 activating every time another UI element did. And everything worked fine, until I implemented the lvlup system, which didn't play ball for some reason.
+
+##############################################################################################################################################
+
+21.1.2022
+
+Made a naming system. Learned to do some prototyping before you start playing too much with the code. Next up: keyboard targeting:
+
+We make a cursor entity. That cursor will display the name of anything that's under it, and when targetting, activate the item. Only thing needed is the entity.

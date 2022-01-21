@@ -4,10 +4,12 @@ from game_state import GameStates
 from menus import character_screen, inventory_menu, level_up_menu
 
 class RenderOrder(Enum):
-    STAIRS = 1
-    ITEM = 2
-    CORPSE = 3
-    ACTOR = 4
+    INVISIBLE = 1
+    STAIRS = 2
+    ITEM = 3
+    CORPSE = 4
+    ACTOR = 5
+    UI = 6
 
 
 def get_names_under_mouse(mouse, entities, fov_map): #Displays the name of stuff under our mouse on the UI.
@@ -60,7 +62,10 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
     
     for entity in entities_in_render_order:         # Draw all entities in the list
-        if fov_map.fov[entity.y][entity.x] or (entity.stairs and game_map.tiles[entity.x][entity.y].explored): #If it's in our fov-range
+        if entity.render_order != RenderOrder.INVISIBLE:
+            if fov_map.fov[entity.y][entity.x] or (entity.stairs and game_map.tiles[entity.x][entity.y].explored): #If it's in our fov-range
+                draw_entity(con, entity)
+        if entity.name == "Cursor" and entity.render_order == RenderOrder.ACTOR:
             draw_entity(con, entity)
 
     libtcod.console_set_default_background(panel, libtcod.black)#Sets the UI background as black
