@@ -149,7 +149,7 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
                 if monster_choice == "goblin": #We randomize between two different monsters
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8))
+                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 18, 8, 8, 8, 8))
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, Name(name_list, "goblin"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
