@@ -52,7 +52,7 @@ def get_constants():
     screen_height = 72
 
     bar_width = 22
-    panel_height = 14
+    panel_height = 16
     panel_y = screen_height - panel_height
 
     message_x = bar_width + 2

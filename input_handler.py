@@ -15,6 +15,8 @@ def handle_keys(key, game_state): #Determines which control-scheme to use
         return handle_character_screen(key)
     elif game_state == GameStates.LOOK:
         return handle_look_keys(key)
+    elif game_state == GameStates.LOOK_AT:
+        return handle_look_at_keys(key)
 
     return {}
 
@@ -22,6 +24,12 @@ def handle_character_screen(key):
     if key.vk == libtcod.KEY_ESCAPE:
         return {"exit":True}
     
+    return {}
+
+def handle_look_at_keys(key):
+    if key.vk == libtcod.KEY_ESCAPE or key.vk == libtcod.KEY_ENTER:
+        return {"exit_look_at":True}
+
     return {}
 
 

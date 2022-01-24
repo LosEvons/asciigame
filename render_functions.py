@@ -1,7 +1,7 @@
 import tcod as libtcod
 from enum import Enum
 from game_state import GameStates
-from menus import character_screen, inventory_menu, level_up_menu
+from menus import character_screen, fighter_info_screen, inventory_menu, level_up_menu
 
 class RenderOrder(Enum):
     INVISIBLE = 1
@@ -22,6 +22,7 @@ def get_names_under_mouse(mouse, entities, fov_map, cursor): #Displays the name 
     return names.capitalize()
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color): #Render the HP bar
+    panel.draw_frame(0, 0, panel.width, panel.height, "Game Messages")
     bar_width = int(float(value) / maximum * total_width) #Define how long the hp bar should be
 
     libtcod.console_set_default_background(panel, back_color)
@@ -33,6 +34,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     libtcod.console_set_default_foreground(panel, libtcod.white) 
     libtcod.console_print_ex(panel, int(x + total_width/2), y, libtcod.BKGND_NONE, #Defines the hp indication text
         libtcod.CENTER, "{}: {}/{}".format(name, value, maximum))
+    
 
 def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
     screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor):
@@ -108,7 +110,13 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
             screen_width, screen_height)
 
     if game_state == GameStates.CHARACTER_SCREEN:
-        character_screen(player, 30, 10, screen_width, screen_height)
+        character_screen(player, 30, panel_height, screen_width, screen_height)
+    
+    if game_state == GameStates.LOOK_AT:
+        for entity in entities:
+            if entity.x == cursor.x and entity.y == cursor.y and entity.render_order != RenderOrder.INVISIBLE:
+                if entity.fighter:
+                    fighter_info_screen(entity, 30, 10, screen_width, screen_height)
 
 
 

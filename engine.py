@@ -27,7 +27,7 @@ def main():
         constants["screen_height"], "libtcode game", False) # Configuring the game window/console
 
     con = libtcod.console_new(constants["screen_width"], constants["screen_height"]) #Initializing the game window/console
-    panel = libtcod.console_new(constants["screen_width"], constants["panel_height"]) #We initialize the UI panel
+    panel = libtcod.console_new(constants["screen_width"]-30, constants["panel_height"]) #We initialize the UI panel
 
     player = None
     cursor = None
@@ -124,6 +124,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         chosen_target = action.get("chosen_target")
         look = action.get("look")
         look_cancel = action.get("look_cancel")
+        look_at = action.get("look_at")
+        exit_look_at = action.get("exit_look_at")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -136,10 +138,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             game_state = GameStates.LOOK
             cursor.render_order = RenderOrder.UI
             cursor.x, cursor.y = player.x, player.y
-    	
+
         if look_cancel:
             cursor.render_order = RenderOrder.INVISIBLE
             game_state = previous_game_state
+
+        if look_at:
+            game_state = GameStates.LOOK_AT
+        
+        if exit_look_at:
+            game_state = GameStates.LOOK
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
