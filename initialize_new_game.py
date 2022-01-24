@@ -18,17 +18,17 @@ from render_functions import RenderOrder
 from components.character_sheet import CharacterSheet
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=100, defense=1, power=2, character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10))
+    fighter_component = Fighter(character_sheet=CharacterSheet(12, 12, 12, 12, 12, 12))
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
-    player = Entity(0, 0, '@', libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
+    player = Entity(0, 0, "@", libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
         fighter=fighter_component, inventory=inventory_component, level=level_component,
         equipment=equipment_component) #Initializing the player
     cursor = Entity(50, 50, 'X', libtcod.light_red, "Cursor", render_order=RenderOrder.INVISIBLE)
     entities = [player, cursor] #List of all the entities
     
-    equipment_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    equipment_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2, 4), damage_bonus=1)
     dagger = Entity(0, 0, '-', libtcod.sky, "Dagger", equippable=equipment_component)
     player.inventory.add_items(dagger)
     player.equipment.toggle_equip(dagger)
@@ -52,7 +52,7 @@ def get_constants():
     screen_height = 72
 
     bar_width = 22
-    panel_height = 14
+    panel_height = 16
     panel_y = screen_height - panel_height
 
     message_x = bar_width + 2
@@ -72,12 +72,15 @@ def get_constants():
 
     name_list = get_name_list()
 
+    special_char_list = get_special_characters()
+
     colors = {
        'dark_wall': libtcod.Color(50, 50, 50),
        'dark_ground': libtcod.Color(50, 50, 50),
        'light_wall': libtcod.Color(255, 255, 255),
        'light_ground': libtcod.Color(100, 100, 100)
        }
+
     
     constants = {
         "window_title":window_title,                    #Game window title
@@ -98,7 +101,8 @@ def get_constants():
         "fov_light_walls":fov_light_walls,              #Determines if the fov lights walls
         "fov_radius":fov_radius,                        #Size of FOV
         "colors":colors,                                #A list of useful colors
-        "name_list":name_list                           #A list used for dynamic allocation of names to entities
+        "name_list":name_list,                          #A list used for dynamic allocation of names to entities
+        "special_char_list":special_char_list
     }
 
     return constants
@@ -110,3 +114,9 @@ def get_name_list():
         name_list = json.load(DATA_FILE)
         return name_list[0]
 
+def get_special_characters():
+    DATA_FOLDER = "data"
+    CHAR_DATA = os.path.join(DATA_FOLDER, "special_characters_index.json")
+    with open (CHAR_DATA, "r") as DATA_FILE:
+        char_list = json.load(DATA_FILE)
+        return char_list[0]

@@ -17,17 +17,21 @@ from menus import main_menu, message_box
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
+#TILE_FILE = os.path.join(DATA_FOLDER, "arial10x10.png")
 BACKGROUND_FILE = os.path.join(DATA_FOLDER, "bground.jpg")
+
 
 def main():
     constants = get_constants()
         
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD) #Configuring the font
+    #libtcod.tileset.load_tilesheet(TILE_FILE, 16, 16, libtcod.tileset.CHARMAP_CP437)
     libtcod.console_init_root(constants["screen_width"], 
         constants["screen_height"], "libtcode game", False) # Configuring the game window/console
 
     con = libtcod.console_new(constants["screen_width"], constants["screen_height"]) #Initializing the game window/console
-    panel = libtcod.console_new(constants["screen_width"], constants["panel_height"]) #We initialize the UI panel
+    panel = libtcod.console_new(constants["screen_width"]-30, constants["panel_height"]) #We initialize the UI panel
+    other_bars = libtcod.console_new(12, 6)
 
     player = None
     cursor = None
@@ -80,11 +84,11 @@ def main():
         else:
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, panel, constants, name_list, cursor)
+                con, panel, other_bars, constants, name_list, cursor)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, name_list, cursor):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, other_bars, constants, name_list, cursor):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -99,7 +103,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             recompute_fov(fov_map, player.x, player.y, constants["fov_radius"], constants["fov_light_walls"], constants["fov_algorithm"])
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
-        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
+        render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
             constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
@@ -124,6 +128,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         chosen_target = action.get("chosen_target")
         look = action.get("look")
         look_cancel = action.get("look_cancel")
+        look_at = action.get("look_at")
+        exit_look_at = action.get("exit_look_at")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -136,10 +142,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             game_state = GameStates.LOOK
             cursor.render_order = RenderOrder.UI
             cursor.x, cursor.y = player.x, player.y
-    	
+
         if look_cancel:
             cursor.render_order = RenderOrder.INVISIBLE
             game_state = previous_game_state
+
+        if look_at:
+            game_state = GameStates.LOOK_AT
+        
+        if exit_look_at:
+            game_state = GameStates.LOOK
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
