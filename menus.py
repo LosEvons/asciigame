@@ -30,19 +30,22 @@ def menu(con, header, options, width, screen_width, screen_height):
 
     window = libtcod.console_new(width, height)
 
+
     libtcod.console_set_default_foreground(window, libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    libtcod.console_print_rect_ex(window, 0, 1, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
 
     y = header_height
     letter_index = ord('a')
     for option_text in options:
         text = "(" + chr(letter_index) + ") " + option_text
-        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
+        libtcod.console_print_ex(window, 1, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
         y += 1
         letter_index += 1
     
     x = int(screen_width / 2 - width / 2)
     y = int(screen_height / 2 - height / 2)
+    #x = screen_width - width
+    #y = screen_height - height
     libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
 def inventory_menu(con, header, player, inventory_width, screen_width, screen_height):
@@ -101,17 +104,19 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
     window.draw_frame(0, 0, char_screen_width, char_screen_height)
 
     libtcod.console_set_default_foreground(window, libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 1, char_screen_width, char_screen_height,
+    libtcod.console_print_rect_ex(window, 1, 1, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Character Information")
-    libtcod.console_print_rect_ex(window, 0, 2, char_screen_width, char_screen_height,
+    libtcod.console_print_rect_ex(window, 1, 2, char_screen_width, char_screen_height,
+        libtcod.BKGND_NONE, libtcod.LEFT, "Name: {}".format(entity.name))
+    libtcod.console_print_rect_ex(window, 1, 3, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Max HP: {}".format(entity.fighter.max_hp))
     if entity.equipment:
-        libtcod.console_print_rect_ex(window, 0, 3, char_screen_width, char_screen_height,
+        libtcod.console_print_rect_ex(window, 1, 4, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}+{}".format(entity.equipment.damage_dice[0], entity.equipment.damage_dice[1], entity.equipment.damage_bonus))
     else:
-        libtcod.console_print_rect_ex(window, 0, 3, char_screen_width, char_screen_height,
+        libtcod.console_print_rect_ex(window, 1, 5, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}".format(entity.fighter.unarmed_damage[0], entity.fighter.unarmed_damage[1]))
-    libtcod.console_print_rect_ex(window, 0, 4, char_screen_width, char_screen_height,
+    libtcod.console_print_rect_ex(window, 1, 6, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "AC: {}".format(entity.fighter.ac))
 
     x = screen_width - char_screen_width

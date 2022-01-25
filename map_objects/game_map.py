@@ -15,7 +15,7 @@ from components.item import Item
 from item_functions import cast_confusion, cast_fireball, cast_lightning, heal
 from components.stairs import Stairs
 from random_utils import from_dungeon_level, random_choice_from_dict
-from components.name import Name
+from components.name import Name, name_from_parts
 """
 This is used to generate the game map.
 """
@@ -33,8 +33,18 @@ class GameMap:
 
         return tiles
 
+    def get_adjacent_tiles(self, x, y):
+        adjacent_tiles = {
+            "up":self.tiles[x][y-1],
+            "down":self.tiles[x][y+1],
+            "left":self.tiles[x-1][y],
+            "right":self.tiles[x+1][y]
+        }
+        return adjacent_tiles
+      
+
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, 
-        player, entities, name_list):
+        player, entities, name_list, name_part_list):
         rooms = [] #Array of all the rooms and their properties. Appaerntly in the form: (anchor_x, anchor_y, size_x, size_y)
         num_rooms = 0
 
@@ -75,7 +85,7 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                self.place_entities(new_room, entities, name_list) #Here we generate entities for each room
+                self.place_entities(new_room, entities, name_list, name_part_list) #Here we generate entities for each room
                 rooms.append(new_room) #Finally we add the room to our index and mark it in the room counter
                 num_rooms += 1
         stairs_component = Stairs(self.dungeon_level +1)
@@ -121,7 +131,7 @@ class GameMap:
 
         return False
 
-    def place_entities(self, room, entities, name_list): #Randomly decides a place in the room for our monsters
+    def place_entities(self, room, entities, name_list, name_part_list): #Randomly decides a place in the room for our monsters
         max_monsters_per_room = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.dungeon_level)
         max_items_per_room = from_dungeon_level([[1, 1], [2, 4]], self.dungeon_level)
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
@@ -137,8 +147,11 @@ class GameMap:
             "lightning_scroll":from_dungeon_level([[25, 4]], self.dungeon_level), 
             "fireball_scroll":from_dungeon_level([[25, 1]], self.dungeon_level), 
             "confusion_scroll":from_dungeon_level([[25, 1]], self.dungeon_level),
-            "sword":from_dungeon_level([[5, 4]], self.dungeon_level),
-            "shield":from_dungeon_level([[15, 0]], self.dungeon_level)
+            "shield":from_dungeon_level([[15, 0]], self.dungeon_level),
+            "1d6sword":from_dungeon_level([[50, 1]], self.dungeon_level),
+            "1d8sword":from_dungeon_level([[30, 1]], self.dungeon_level),
+            "2d6sword":from_dungeon_level([[20, 1]], self.dungeon_level),
+            "2d8sword":from_dungeon_level([[10, 1]],self.dungeon_level)
             }
 
         for i in range(number_of_monsters): #Iterate through all the monsters
@@ -149,8 +162,8 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
                 if monster_choice == "goblin": #We randomize between two different monsters
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 18, 8, 8, 8, 8))
-                    monster = Entity(x, y, 'o', libtcod.desaturated_green, Name(name_list, "goblin"), blocks=True, 
+                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8))
+                    monster = Entity(x, y, 'o', libtcod.desaturated_green, name_from_parts(name_part_list), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
                     ai_component = BasicMonster()
@@ -187,10 +200,24 @@ class GameMap:
                     item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
                     item = Entity(x, y, '?', libtcod.yellow, "Lightning Scroll", render_order=RenderOrder.ITEM,
                         item=item_component)
-                elif item_choice == "sword":
-                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2,8), damage_bonus=2)
+                
+                elif item_choice == "1d6sword":
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(1,6), damage_bonus=randint(0, 5))
                     item = Entity(x, y, "/", libtcod.sky, Name(name_list, "sword"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
+                elif item_choice == "1d8sword":
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(1,8), damage_bonus=randint(0, 5))
+                    item = Entity(x, y, "/", libtcod.sky, Name(name_list, "sword"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                elif item_choice == "2d6sword":
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2,6), damage_bonus=randint(0, 10))
+                    item = Entity(x, y, "/", libtcod.sky, Name(name_list, "sword"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                elif item_choice == "2d8sword":
+                    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2,8), damage_bonus=randint(0, 10))
+                    item = Entity(x, y, "/", libtcod.sky, Name(name_list, "sword"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+            
                 elif item_choice == "shield":
                     equippable_component = Equippable(EquipmentSlots.OFF_HAND, ac_bonus=2)
                     item = Entity(x, y, "[", libtcod.darker_orange, Name(name_list, "shield"), render_order=RenderOrder.ITEM,

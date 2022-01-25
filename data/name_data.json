@@ -4,5 +4,10 @@
     "hydra_names":["Matti", "Teppo", "Pasi", "Timo", "Reiska", "Taavi", "Jarno", "Tarmo", "Veeti", "Jaakko"],
     "sword_names":["Excalibur", "Frostmourne", "Sword of Fathoms", "Silverlight", "Starrazor"],
     "shield_names":["Trash Can Cover", "Cast-Iron Pan", "Wooden Plank", "Restaurant Tray"]
+    },
+    {
+    "first_names":["James", "Jim", "Carl", "Bella", "Bart", "Sean", "Shawn", "Steve", "Raul", "Fjord", "Caleb", "Percival", "Daniel", "Lee", "David"],
+    "syllables":["va", "de", "mac", "lon", "sa", "ra", "te", "vim", "ros", "dam", "la", "vore"],
+    "consonants":["p", "b", "t", "d", "k", "g", "f", "v", "s", "z", "h", "x", "m", "n", "l", "r", "w", "j"]
     }
 ]

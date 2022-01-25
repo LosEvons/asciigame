@@ -1,12 +1,41 @@
 from equipment_slots import EquipmentSlots
 
 class Equipment:
-    def __init__(self, main_hand=None, off_hand=None):
+    def __init__(self, main_hand=None, off_hand=None, head=None, shoulders=None, chest=None, 
+        arms=None, right_hand=None, left_hand=None, waist=None, legs=None, feet=None):
         self.main_hand = main_hand
         self.off_hand = off_hand
+        self.head = head
+        self.shoulders = shoulders
+        self.chest = chest
+        self.arms = arms
+        self.right_hand = right_hand
+        self.left_hand = left_hand
+        self.waist = waist
+        self.legs = legs
+        self.feet = feet
+        self.bodyparts = []
+        attributes = dir(self)
+        for attribute in attributes:
+            if callable(attribute):
+                continue
+            else:
+                self.bodyparts.append(attribute)
 
     @property
     def max_hp_bonus(self):
+        part_bonuses = {}
+        for part in self.bodyparts:
+            bonus = 0
+            print(part)
+            if part and part.equippable:
+                bonus += part.equippable.max_hp_bonus
+                part_bonuses.update({part:bonus})
+        
+        return part_bonuses
+
+    @property
+    def max_hp_bonus2(self):
         bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
@@ -14,7 +43,34 @@ class Equipment:
 
         if self.off_hand and self.off_hand.equippable:
             bonus += self.off_hand.equippable.max_hp_bonus
+
+        if self.head and self.head.equippable:
+            bonus += self.head.equippable.max_hp_bonus
         
+        if self.shoulders and self.shoulders.equippable:
+            bonus += self.shoulders.equippable.max_hp_bonus
+        
+        if self.chest and self.chest.equippable:
+            bonus += self.chest.equippable.max_hp_bonus
+        
+        if self.chest and self.arms.equippable:
+            bonus += self.off_hand.equippable.max_hp_bonus
+        
+        if self.right_hand and self.right_hand.equippable:
+            bonus += self.right_hand.equippable.max_hp_bonus
+        
+        if self.left_hand and self.left_hand.equippable:
+            bonus += self.left_hand.equippable.max_hp_bonus
+        
+        if self.waist and self.waist.equippable:
+            bonus += self.waist.equippable.max_hp_bonus
+        
+        if self.legs and self.legs.equippable:
+            bonus += self.legs.equippable.max_hp_bonus
+        
+        if self.feet and self.feet.equippable:
+            bonus += self.feet.equippable.max_hp_bonus
+
         return bonus
 
     @property
@@ -26,6 +82,33 @@ class Equipment:
 
         if self.off_hand and self.off_hand.equippable:
             bonus += self.off_hand.equippable.ac_bonus
+        
+        if self.head and self.head.equippable:
+            bonus += self.head.equippable.ac_bonus
+        
+        if self.shoulders and self.shoulders.equippable:
+            bonus += self.shoulders.equippable.ac_bonus
+        
+        if self.chest and self.chest.equippable:
+            bonus += self.chest.equippable.ac_bonus
+        
+        if self.chest and self.arms.equippable:
+            bonus += self.off_hand.equippable.ac_bonus
+        
+        if self.right_hand and self.right_hand.equippable:
+            bonus += self.right_hand.equippable.ac_bonus
+        
+        if self.left_hand and self.left_hand.equippable:
+            bonus += self.left_hand.equippable.ac_bonus
+        
+        if self.waist and self.waist.equippable:
+            bonus += self.waist.equippable.ac_bonus
+        
+        if self.legs and self.legs.equippable:
+            bonus += self.legs.equippable.ac_bonus
+        
+        if self.feet and self.feet.equippable:
+            bonus += self.feet.equippable.ac_bonus
         
         return bonus
 
@@ -39,6 +122,33 @@ class Equipment:
         if self.off_hand and self.off_hand.equippable:
             damage_dice = self.off_hand.equippable.damage_dice
         
+        if self.head and self.head.equippable:
+            damage_dice += self.head.equippable.damage_dice
+        
+        if self.shoulders and self.shoulders.equippable:
+            damage_dice += self.shoulders.equippable.damage_dice
+        
+        if self.chest and self.chest.equippable:
+            damage_dice += self.chest.equippable.damage_dice
+        
+        if self.chest and self.arms.equippable:
+            damage_dice += self.off_hand.equippable.damage_dice
+        
+        if self.right_hand and self.right_hand.equippable:
+            damage_dice += self.right_hand.equippable.damage_dice
+        
+        if self.left_hand and self.left_hand.equippable:
+            damage_dice += self.left_hand.equippable.damage_dice
+        
+        if self.waist and self.waist.equippable:
+            damage_dice += self.waist.equippable.damage_dice
+        
+        if self.legs and self.legs.equippable:
+            damage_dice += self.legs.equippable.damage_dice
+        
+        if self.feet and self.feet.equippable:
+            damage_dice += self.feet.equippable.damage_dice
+        
         return damage_dice
 
     @property
@@ -50,6 +160,33 @@ class Equipment:
 
         if self.off_hand and self.off_hand.equippable:
             damage_bonus = self.off_hand.equippable.damage_bonus
+        
+        if self.head and self.head.equippable:
+            damage_bonus += self.head.equippable.damage_bonus
+        
+        if self.shoulders and self.shoulders.equippable:
+            damage_bonus += self.shoulders.equippable.damage_bonus
+        
+        if self.chest and self.chest.equippable:
+            damage_bonus += self.chest.equippable.damage_bonus
+        
+        if self.chest and self.arms.equippable:
+            damage_bonus += self.off_hand.equippable.damage_bonus
+        
+        if self.right_hand and self.right_hand.equippable:
+            damage_bonus += self.right_hand.equippable.damage_bonus
+        
+        if self.left_hand and self.left_hand.equippable:
+            damage_bonus += self.left_hand.equippable.damage_bonus
+        
+        if self.waist and self.waist.equippable:
+            damage_bonus += self.waist.equippable.damage_bonus
+        
+        if self.legs and self.legs.equippable:
+            damage_bonus += self.legs.equippable.damage_bonus
+        
+        if self.feet and self.feet.equippable:
+            damage_bonus += self.feet.equippable.damage_bonus
         
         return damage_bonus
 
