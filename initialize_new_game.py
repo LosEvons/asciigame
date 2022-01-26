@@ -18,11 +18,11 @@ from render_functions import RenderOrder
 from components.character_sheet import CharacterSheet
 
 def get_game_variables(constants):
-    fighter_component = Fighter(character_sheet=CharacterSheet(12, 12, 12, 12, 12, 12))
+    fighter_component = Fighter(character_sheet=CharacterSheet(15, 15, 15, 12, 12, 12))
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
-    print(equipment_component.bodyparts)
+    
     player = Entity(0, 0, "@", libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
         fighter=fighter_component, inventory=inventory_component, level=level_component,
         equipment=equipment_component) #Initializing the player
@@ -39,13 +39,13 @@ def get_game_variables(constants):
 
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
     game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
-        constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list) #Generate the map
+        constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor) #Generate the map
 
     message_log = MessageLog(constants["message_x"], constants["message_width"], constants["message_height"])
 
     game_state = GameStates.PLAYERS_TURN #Gives the initiative to the player
 
-    return player, entities, game_map, message_log, game_state, name_list, cursor
+    return player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list
 
 def get_constants():
     window_title = "Libtcod roguelike"
@@ -59,7 +59,7 @@ def get_constants():
 
     message_x = bar_width + 2
     message_width = screen_width - bar_width - 2
-    message_height = panel_height - 1
+    message_height = panel_height - 2
     
     map_width = screen_width
     map_height = screen_height - panel_height

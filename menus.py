@@ -5,9 +5,9 @@ def message_box(con, header, width, screen_width, screen_height):
 
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
     options = [
-        "Constitution (+20 HP, from {})".format(player.fighter.max_hp),
-        "Strenght (+1 attack, from {})".format(player.fighter.power),
-        "Agility (+1 defense, from {})".format(player.fighter.defense)
+        "Constitution ({}+1)".format(player.fighter.character_sheet.constitution),
+        "Strength ({}+1)".format(player.fighter.character_sheet.strenght),
+        "Dexterity ({}+1)".format(player.fighter.character_sheet.dexterity)
     ]
 
     menu(con, header, options, menu_width, screen_width, screen_height)
@@ -44,8 +44,6 @@ def menu(con, header, options, width, screen_width, screen_height):
     
     x = int(screen_width / 2 - width / 2)
     y = int(screen_height / 2 - height / 2)
-    #x = screen_width - width
-    #y = screen_height - height
     libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
 def inventory_menu(con, header, player, inventory_width, screen_width, screen_height):
@@ -55,9 +53,14 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
         options = []
         for item in player.inventory.items:
             if player.equipment.main_hand == item:
-                options.append("{} (on main hand)".format(item.name))
+                options.append("{} {}d{}+{} (on main hand)".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
             elif player.equipment.off_hand == item:
-                options.append("{} (on off hand)".format(item.name))
+                options.append("{} {} (on off hand)".format(item.name, item.equippable.ac_bonus))
+            elif item not in options and item.equippable:
+                if item.equippable.ac_bonus:
+                    options.append("{} {}".format(item.name, item.equippable.ac_bonus))
+                elif item.equippable.damage_dice:
+                    options.append("{} {}d{}+{}".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
             else:
                 options.append(item.name)
         #options = [item.name for item in inventory.items]
@@ -81,12 +84,13 @@ def character_screen(player, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Experience to Level: {}".format(player.level.experience_to_next_level - player.level.current_xp))
     libtcod.console_print_rect_ex(window, 1, 5, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Max HP: {}".format(player.fighter.max_hp))
-    if player.equipment:
+    if player.equipment.damage_dice != None:
         libtcod.console_print_rect_ex(window, 1, 6, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}+{}".format(player.equipment.damage_dice[0], player.equipment.damage_dice[1], player.equipment.damage_bonus))
     else:
         libtcod.console_print_rect_ex(window, 1, 6, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}".format(player.fighter.unarmed_damage[0], player.fighter.unarmed_damage[1]))
+        
     libtcod.console_print_rect_ex(window, 1, 7, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "AC: {}".format(player.fighter.ac))
 
@@ -110,13 +114,14 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Name: {}".format(entity.name))
     libtcod.console_print_rect_ex(window, 1, 3, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Max HP: {}".format(entity.fighter.max_hp))
-    if entity.equipment:
+    if entity.equipment.damage_dice:
         libtcod.console_print_rect_ex(window, 1, 4, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}+{}".format(entity.equipment.damage_dice[0], entity.equipment.damage_dice[1], entity.equipment.damage_bonus))
     else:
-        libtcod.console_print_rect_ex(window, 1, 5, char_screen_width, char_screen_height,
+        libtcod.console_print_rect_ex(window, 1, 4, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}".format(entity.fighter.unarmed_damage[0], entity.fighter.unarmed_damage[1]))
-    libtcod.console_print_rect_ex(window, 1, 6, char_screen_width, char_screen_height,
+
+    libtcod.console_print_rect_ex(window, 1, 5, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "AC: {}".format(entity.fighter.ac))
 
     x = screen_width - char_screen_width

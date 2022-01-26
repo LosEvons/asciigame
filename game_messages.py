@@ -9,12 +9,14 @@ class Message:
 class MessageLog: #We make a global message log, that will be displayed in the UI.
     def __init__(self, x, width, height):
         self.messages = []
+        self.message_archive = []
         self.x = x
         self.width = width
         self.height = height
     
     def add_message(self, message): #Add messages to the log
         new_msg_lines = textwrap.wrap(message.text, self.width)
+        self.message_archive.append(message)
 
         for line in new_msg_lines:
             if len(self.messages) == self.height: #If the UI can't hold all the messages. We just delete them for now.

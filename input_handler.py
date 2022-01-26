@@ -38,11 +38,11 @@ def handle_level_up_menu(key):
         key_char = chr(key.c)
         
         if key_char == 'a':
-            return {"level_up":"hp"}
+            return {"level_up":"con"}
         elif key_char == 'b':
             return {"level_up":"str"}
         elif key_char == 'c':
-            return {"level_up":"def"}
+            return {"level_up":"dex"}
 
     return {}
 

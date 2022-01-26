@@ -14,25 +14,18 @@ class Equipment:
         self.waist = waist
         self.legs = legs
         self.feet = feet
-        self.bodyparts = []
-        attributes = dir(self)
-        for attribute in attributes:
-            if callable(attribute):
-                continue
-            else:
-                self.bodyparts.append(attribute)
+        self.bodyparts = [self.main_hand, self.off_hand,  self.head, self.shoulders, self.chest, self.arms, self.right_hand, self.left_hand,
+            self.waist, self.legs, self.feet]
 
     @property
     def max_hp_bonus(self):
-        part_bonuses = {}
+        bonus = 0
         for part in self.bodyparts:
-            bonus = 0
-            print(part)
             if part and part.equippable:
                 bonus += part.equippable.max_hp_bonus
-                part_bonuses.update({part:bonus})
         
-        return part_bonuses
+        return bonus
+    
 
     @property
     def max_hp_bonus2(self):
@@ -114,40 +107,40 @@ class Equipment:
 
     @property
     def damage_dice(self):
-        damage_dice = 0
+        damage_dice = None
 
-        if self.main_hand and self.main_hand.equippable:
+        if self.main_hand and self.main_hand.equippable and self.main_hand.equippable.damage_dice:
             damage_dice = self.main_hand.equippable.damage_dice
 
-        if self.off_hand and self.off_hand.equippable:
+        if self.off_hand and self.off_hand.equippable and self.off_hand.equippable.damage_dice:
             damage_dice = self.off_hand.equippable.damage_dice
         
-        if self.head and self.head.equippable:
-            damage_dice += self.head.equippable.damage_dice
+        if self.head and self.head.equippable and self.head.equippable.damage_dice:
+            damage_dice = self.head.equippable.damage_dice
         
-        if self.shoulders and self.shoulders.equippable:
-            damage_dice += self.shoulders.equippable.damage_dice
+        if self.shoulders and self.shoulders.equippable and self.shoulders.equippable.damage_dice:
+            damage_dice = self.shoulders.equippable.damage_dice
         
-        if self.chest and self.chest.equippable:
-            damage_dice += self.chest.equippable.damage_dice
+        if self.chest and self.chest.equippable and self.chest.equippable.damage_dice:
+            damage_dice = self.chest.equippable.damage_dice
         
-        if self.chest and self.arms.equippable:
-            damage_dice += self.off_hand.equippable.damage_dice
+        if self.chest and self.arms.equippable and self.arms.equippable.damage_dice:
+            damage_dice = self.off_hand.equippable.damage_dice
         
-        if self.right_hand and self.right_hand.equippable:
-            damage_dice += self.right_hand.equippable.damage_dice
+        if self.right_hand and self.right_hand.equippable and self.right_hand.equippable.damage_dice:
+            damage_dice = self.right_hand.equippable.damage_dice
         
-        if self.left_hand and self.left_hand.equippable:
-            damage_dice += self.left_hand.equippable.damage_dice
+        if self.left_hand and self.left_hand.equippable and self.left_hand.equippable.damage_dice:
+            damage_dice = self.left_hand.equippable.damage_dice
         
-        if self.waist and self.waist.equippable:
-            damage_dice += self.waist.equippable.damage_dice
+        if self.waist and self.waist.equippable and self.waist.equippable.damage_dice:
+            damage_dice = self.waist.equippable.damage_dice
+    
+        if self.legs and self.legs.equippable and self.legs.equippable.damage_dice:
+            damage_dice = self.legs.equippable.damage_dice
         
-        if self.legs and self.legs.equippable:
-            damage_dice += self.legs.equippable.damage_dice
-        
-        if self.feet and self.feet.equippable:
-            damage_dice += self.feet.equippable.damage_dice
+        if self.feet and self.feet.equippable and self.feet.equippable.damage_dice:
+            damage_dice = self.feet.equippable.damage_dice
         
         return damage_dice
 
@@ -156,10 +149,10 @@ class Equipment:
         damage_bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
-            damage_bonus = self.main_hand.equippable.damage_bonus
+            damage_bonus += self.main_hand.equippable.damage_bonus
 
         if self.off_hand and self.off_hand.equippable:
-            damage_bonus = self.off_hand.equippable.damage_bonus
+            damage_bonus += self.off_hand.equippable.damage_bonus
         
         if self.head and self.head.equippable:
             damage_bonus += self.head.equippable.damage_bonus

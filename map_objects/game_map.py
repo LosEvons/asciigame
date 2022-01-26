@@ -44,7 +44,7 @@ class GameMap:
       
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, 
-        player, entities, name_list, name_part_list):
+        player, entities, name_list, name_part_list, cursor):
         rooms = [] #Array of all the rooms and their properties. Appaerntly in the form: (anchor_x, anchor_y, size_x, size_y)
         num_rooms = 0
 
@@ -94,13 +94,13 @@ class GameMap:
             stairs=stairs_component)
         entities.append(down_stairs)
 
-    def next_floor(self, player, message_log, constants, name_list):
+    def next_floor(self, player, message_log, constants, name_list, name_part_list, cursor):
         self.dungeon_level += 1
-        entities = [player]
+        entities = [player, cursor]
 
         self.tiles = self.initialize_tiles()
         self.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"],
-            constants["map_width"], constants["map_height"], player, entities, name_list)
+            constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor)
         
         player.fighter.heal(player.fighter.max_hp // 2)
 
@@ -132,26 +132,27 @@ class GameMap:
         return False
 
     def place_entities(self, room, entities, name_list, name_part_list): #Randomly decides a place in the room for our monsters
-        max_monsters_per_room = from_dungeon_level([[2, 1], [3, 4], [5, 6]], self.dungeon_level)
-        max_items_per_room = from_dungeon_level([[1, 1], [2, 4]], self.dungeon_level)
+        max_monsters_per_room = from_dungeon_level([[1, 1], [3, 4], [5, 6]], self.dungeon_level)
+        max_items_per_room = from_dungeon_level([[2, 1], [2, 4]], self.dungeon_level)
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
         number_of_items = randint(0, max_items_per_room)
 
         monster_chances = {
-            "goblin":80, 
+            "hound":from_dungeon_level([[80, 1], [50, 2], [10, 3], [0, 4]], self.dungeon_level),
+            "goblin":from_dungeon_level([[50, 2], [80, 3]], self.dungeon_level), 
             "hydra":from_dungeon_level([[15, 3], [30, 5], [60, 7]], self.dungeon_level)
             }
 
         item_chances = {
-            "healing_potion":70, 
+            "healing_potion":30, 
             "lightning_scroll":from_dungeon_level([[25, 4]], self.dungeon_level), 
             "fireball_scroll":from_dungeon_level([[25, 1]], self.dungeon_level), 
             "confusion_scroll":from_dungeon_level([[25, 1]], self.dungeon_level),
-            "shield":from_dungeon_level([[15, 0]], self.dungeon_level),
-            "1d6sword":from_dungeon_level([[50, 1]], self.dungeon_level),
-            "1d8sword":from_dungeon_level([[30, 1]], self.dungeon_level),
+            "shield":from_dungeon_level([[80, 1]], self.dungeon_level),
+            "1d6sword":from_dungeon_level([[80, 1]], self.dungeon_level),
+            "1d8sword":from_dungeon_level([[20, 1]], self.dungeon_level),
             "2d6sword":from_dungeon_level([[20, 1]], self.dungeon_level),
-            "2d8sword":from_dungeon_level([[10, 1]],self.dungeon_level)
+            "2d8sword":from_dungeon_level([[20, 1]],self.dungeon_level)
             }
 
         for i in range(number_of_monsters): #Iterate through all the monsters
@@ -160,15 +161,20 @@ class GameMap:
 
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
                 monster_choice = random_choice_from_dict(monster_chances)
-                if monster_choice == "goblin": #We randomize between two different monsters
+                if monster_choice == "hound":
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8))
-                    monster = Entity(x, y, 'o', libtcod.desaturated_green, name_from_parts(name_part_list), blocks=True, 
+                    fighter_component = Fighter(character_sheet=CharacterSheet(6, 6, 6, 6, 6, 6), xp = 30)
+                    monster = Entity(x, y, 'h', libtcod.dark_orange, name_from_parts(name_part_list), blocks=True,
+                        render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                elif monster_choice == "goblin": #We randomize between two different monsters
+                    ai_component = BasicMonster()
+                    fighter_component = Fighter(character_sheet=CharacterSheet(8, 8, 8, 8, 8, 8), xp=50)
+                    monster = Entity(x, y, 'g', libtcod.desaturated_green, name_from_parts(name_part_list), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == "hydra":
                     ai_component = BasicMonster()
-                    fighter_component = Fighter(character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10))
-                    monster = Entity(x, y, 'T', libtcod.darker_green, Name(name_list, "hydra"), blocks=True, 
+                    fighter_component = Fighter(character_sheet=CharacterSheet(10, 10, 10, 10, 10, 10), xp=100)
+                    monster = Entity(x, y, 'H', libtcod.darker_green, Name(name_list, "hydra"), blocks=True, 
                         render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
 
                 entities.append(monster) #Add the monster to our list of entities
@@ -177,7 +183,6 @@ class GameMap:
         for i in range(number_of_items):
             x = randint(room.x1 + 1, room.x2 - 1)
             y = randint(room.y1 + 1, room .y2 - 1)
-            item_component = Item(use_function=heal, amount=4)
 
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]):
                 item_choice = random_choice_from_dict(item_chances)

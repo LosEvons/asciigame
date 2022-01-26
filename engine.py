@@ -14,6 +14,7 @@ from game_messages import Message
 from initialize_new_game import get_constants, get_game_variables
 from data_loaders import save_game, load_game
 from menus import main_menu, message_box
+from random_utils import roll
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
@@ -70,12 +71,12 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state, name_list, cursor = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state, name_list, cursor = load_game()
+                    player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -84,11 +85,11 @@ def main():
         else:
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, panel, other_bars, constants, name_list, cursor)
+                con, panel, other_bars, constants, name_list, cursor, name_part_list)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, other_bars, constants, name_list, cursor):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, other_bars, constants, name_list, cursor, name_part_list):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -228,13 +229,20 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
                 game_state = previous_game_state
 
         if level_up:
-            if level_up == "hp":
-                player.fighter.base_max_hp += 20
-                player.fighter.hp += 20
+            if level_up == "con":
+                player.fighter.character_sheet.constitution += 1
+                player.fighter.base_max_hp += roll(1, 8)[0]
+                if player.fighter.hp + player.fighter.character_sheet.ability_modifiers.get("con") <= player.fighter.max_hp:
+                    player.fighter.hp += player.fighter.character_sheet.ability_modifiers.get("con")
+                else:
+                    player.fighter.hp = player.fighter.max_hp
+                
+
+
             elif level_up == "str":
-                player.fighter.base_power += 1
-            elif level_up == "def":
-                player.fighter.base_defense += 1
+                player.fighter.character_sheet.strenght += 1
+            elif level_up == "dex":
+                player.fighter.character_sheet.dexterity += 1
             
             game_state = previous_game_state
 
@@ -245,7 +253,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.stairs and entity.x == player.x and entity.y == player.y:
-                    entities = game_map.next_floor(player, message_log, constants, name_list)
+                    entities = game_map.next_floor(player, message_log, constants, name_list, name_part_list, cursor)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
                     libtcod.console_clear(con)
@@ -263,7 +271,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({"targeting_canceled":True})
             else:
-                save_game(player, entities, game_map, message_log, game_state, name_list, cursor)
+                save_game(player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list)
 
 
                 return True
