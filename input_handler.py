@@ -17,7 +17,18 @@ def handle_keys(key, game_state): #Determines which control-scheme to use
         return handle_look_keys(key)
     elif game_state == GameStates.LOOK_AT:
         return handle_look_at_keys(key)
+    elif game_state == GameStates.MESSAGE_ARCHIVE:
+        return handle_message_archive_keys(key)
 
+    return {}
+
+def handle_message_archive_keys(key):
+    if key:
+        key_char = chr(key.c)
+
+    if key_char == "r" or key.vk == libtcod.KEY_ESCAPE:
+        return{"exit":True}
+    
     return {}
 
 def handle_character_screen(key):
@@ -177,8 +188,11 @@ def handle_player_turn_keys(key):
 
     elif key_char == 'z':
         return {"wait":True}
+    
+    elif key_char == 'r':
+        return{"message_archive":True}
 
-    if key.vk == libtcod.KEY_ENTER and key.lalt:
+    elif key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle fullscreen
         return {"fullscreen": True}
 

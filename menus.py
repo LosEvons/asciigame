@@ -3,6 +3,18 @@ import tcod as libtcod
 def message_box(con, header, width, screen_width, screen_height):
     menu(con, header, [], width, screen_width, screen_height)
 
+def message_archive_box(con, message_archive, screen_width, screen_height):
+    window = libtcod.console_new(screen_width, screen_height)
+    y = screen_height -2
+    for message in message_archive:
+        if y == 0:
+            break
+
+        libtcod.console_print_ex(window, 1, y, libtcod.BKGND_ALPHA(100), libtcod.LEFT, message.text)
+        y -= 1
+    
+    libtcod.console_blit(window, 0, 0, screen_width, screen_height, 0, 0, 0, 1.0, 0.7)        
+
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
     options = [
         "Constitution ({}+1)".format(player.fighter.character_sheet.constitution),
@@ -102,7 +114,7 @@ def character_screen(player, char_screen_width, char_screen_height,
 
 
 def fighter_info_screen(entity, char_screen_width, char_screen_height, 
-    screen_width, screen_height):
+    screen_width, screen_height, draw_char_screen):
 
     window = libtcod.console_new(char_screen_width, char_screen_height)
     window.draw_frame(0, 0, char_screen_width, char_screen_height)
@@ -114,7 +126,7 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Name: {}".format(entity.name))
     libtcod.console_print_rect_ex(window, 1, 3, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Max HP: {}".format(entity.fighter.max_hp))
-    if entity.equipment.damage_dice:
+    if entity.equipment and entity.equipment.damage_dice:
         libtcod.console_print_rect_ex(window, 1, 4, char_screen_width, char_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Attack: {}d{}+{}".format(entity.equipment.damage_dice[0], entity.equipment.damage_dice[1], entity.equipment.damage_bonus))
     else:
@@ -124,8 +136,12 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
     libtcod.console_print_rect_ex(window, 1, 5, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "AC: {}".format(entity.fighter.ac))
 
-    x = screen_width - char_screen_width
-    y = screen_height - char_screen_height
+    if draw_char_screen:
+        x = screen_width - char_screen_width
+        y = screen_height - char_screen_height * 2
+    else:
+        x = screen_width - char_screen_width
+        y = screen_height - char_screen_height
 
     libtcod.console_blit(window, 0, 0, char_screen_width, char_screen_height,
         0, x, y, 1.0, 0.7)

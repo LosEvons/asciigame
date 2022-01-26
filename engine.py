@@ -98,6 +98,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
     fov_map = initialize_fov(game_map) #Initial state of the fov
     previous_game_state = game_state
     targeting_item = None
+    draw_char_screen = False
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
@@ -105,7 +106,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
         render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
-            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor)
+            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -131,6 +132,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         look_cancel = action.get("look_cancel")
         look_at = action.get("look_at")
         exit_look_at = action.get("exit_look_at")
+        message_archive = action.get("message_archive")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -247,8 +249,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
             game_state = previous_game_state
 
         if show_character_screen:
+            if draw_char_screen:
+                draw_char_screen = False
+            else:
+                draw_char_screen = True
+        
+        if message_archive:
             previous_game_state = game_state
-            game_state = GameStates.CHARACTER_SCREEN
+            game_state = GameStates.MESSAGE_ARCHIVE
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
@@ -266,7 +274,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         if exit:
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.MESSAGE_ARCHIVE):
                 game_state = previous_game_state
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({"targeting_canceled":True})
