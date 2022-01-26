@@ -121,7 +121,7 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
 
     libtcod.console_set_default_foreground(window, libtcod.white)
     libtcod.console_print_rect_ex(window, 1, 1, char_screen_width, char_screen_height,
-        libtcod.BKGND_NONE, libtcod.LEFT, "Character Information")
+        libtcod.BKGND_NONE, libtcod.LEFT, "Entity Information")
     libtcod.console_print_rect_ex(window, 1, 2, char_screen_width, char_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Name: {}".format(entity.name))
     libtcod.console_print_rect_ex(window, 1, 3, char_screen_width, char_screen_height,

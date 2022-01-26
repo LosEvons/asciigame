@@ -1,6 +1,7 @@
 #for later "|"
 import sys
 import os
+import numpy as np
 
 os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import glob
@@ -98,7 +99,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
     fov_map = initialize_fov(game_map) #Initial state of the fov
     previous_game_state = game_state
     targeting_item = None
-    draw_char_screen = False
+    draw_char_screen = True
+    draw_entity_screen = False
+    analyzed_entity = None
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
@@ -106,7 +109,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
         render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
-            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen)
+            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
+            draw_entity_screen)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -131,7 +135,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         look = action.get("look")
         look_cancel = action.get("look_cancel")
         look_at = action.get("look_at")
-        exit_look_at = action.get("exit_look_at")
+        show_entity_screen = action.get("show_entity_screen")
         message_archive = action.get("message_archive")
         
         left_click = mouse_action.get("left_click")
@@ -139,6 +143,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
 
         #Player turn logic
         player_turn_results = []
+
+        if show_entity_screen:
+            if draw_entity_screen:
+                draw_entity_screen = False
+            else:
+                draw_entity_screen = True
+                if analyzed_entity == None:
+                    analyzed_entity = player
+
 
         if look:
             previous_game_state = game_state
@@ -151,10 +164,11 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
             game_state = previous_game_state
 
         if look_at:
-            game_state = GameStates.LOOK_AT
-        
-        if exit_look_at:
-            game_state = GameStates.LOOK
+            for entity in entities:
+                if entity.x == cursor.x and entity.y == cursor.y and entity.render_order != RenderOrder.INVISIBLE:
+                    if entity.fighter:
+                        analyzed_entity = entity
+                        draw_entity_screen = True
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -343,10 +357,6 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
 
                     message_log.add_message(Message("Your skills grow stronger! You reached level {}".format(
                         player.level.current_level), libtcod.yellow))
-
-            if show_character_screen:
-                previous_game_state = game_state
-                game_state = GameStates.CHARACTER_SCREEN
 
         #Enemy turn logic
         if game_state == GameStates.ENEMY_TURN:

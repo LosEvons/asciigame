@@ -60,7 +60,8 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
     
 
 def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
-    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor, draw_char_screen):
+    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
+    draw_entity_screen):
     if fov_recompute:
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
@@ -132,11 +133,11 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
     if draw_char_screen:
         character_screen(player, 30, panel_height, screen_width, screen_height)
     
-    if game_state == GameStates.LOOK_AT:
-        for entity in entities:
-            if entity.x == cursor.x and entity.y == cursor.y and entity.render_order != RenderOrder.INVISIBLE:
-                if entity.fighter:
-                    fighter_info_screen(entity, 30, panel_height, screen_width, screen_height, draw_char_screen)
+    if draw_entity_screen:
+        if analyzed_entity.render_order == RenderOrder.CORPSE:
+            fighter_info_screen(player, 30, panel_height, screen_width, screen_height, draw_char_screen)
+        else:
+            fighter_info_screen(analyzed_entity, 30, panel_height, screen_width, screen_height, draw_char_screen)
 
     if game_state == GameStates.MESSAGE_ARCHIVE:
         message_archive_box(con, message_log.message_archive, screen_width, screen_height)

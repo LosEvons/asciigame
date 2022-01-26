@@ -117,7 +117,6 @@ def handle_look_keys(key):
         return {"cursor_move":(-1,1)}
     elif key_char == 'n' or key.vk == libtcod.KEY_KP3:
         return {"cursor_move":(1,1)}
-    
     elif key.vk == libtcod.KEY_ENTER:
         return {"look_at":True}
     
@@ -191,6 +190,9 @@ def handle_player_turn_keys(key):
     
     elif key_char == 'r':
         return{"message_archive":True}
+
+    elif key_char == 'v':
+        return{"show_entity_screen":True}
 
     elif key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle fullscreen
