@@ -3,7 +3,7 @@ import os
 
 SAVE_GAME = "savegame"
 
-def save_game(player, entities, game_map, message_log, game_state, name_list, cursor):
+def save_game(player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list):
     with shelve.open(SAVE_GAME, 'n') as data_file:
         data_file["player_index"] = entities.index(player)
         data_file["cursor_index"] = entities.index(cursor)
@@ -12,6 +12,7 @@ def save_game(player, entities, game_map, message_log, game_state, name_list, cu
         data_file["message_log"] = message_log
         data_file["game_state"] = game_state
         data_file["name_list"] = name_list
+        data_file["name_part_list"] = name_part_list
 
 def load_game():
     if not os.path.isfile(SAVE_GAME + ".dat"):
@@ -25,9 +26,9 @@ def load_game():
         message_log = data_file["message_log"]
         game_state = data_file["game_state"]
         name_list = data_file["name_list"]
-        cursor = data_file["cursor"]
+        name_part_list = data_file["name_part_list"]
     
     player = entities[player_index]
     cursor = entities[cursor_index]
 
-    return player, entities, game_map, message_log, game_state, name_list, cursor
+    return player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list

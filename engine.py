@@ -1,6 +1,7 @@
 #for later "|"
 import sys
 import os
+import numpy as np
 
 os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import glob
@@ -14,20 +15,25 @@ from game_messages import Message
 from initialize_new_game import get_constants, get_game_variables
 from data_loaders import save_game, load_game
 from menus import main_menu, message_box
+from random_utils import roll
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
+#TILE_FILE = os.path.join(DATA_FOLDER, "arial10x10.png")
 BACKGROUND_FILE = os.path.join(DATA_FOLDER, "bground.jpg")
+
 
 def main():
     constants = get_constants()
         
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD) #Configuring the font
+    #libtcod.tileset.load_tilesheet(TILE_FILE, 16, 16, libtcod.tileset.CHARMAP_CP437)
     libtcod.console_init_root(constants["screen_width"], 
         constants["screen_height"], "libtcode game", False) # Configuring the game window/console
 
     con = libtcod.console_new(constants["screen_width"], constants["screen_height"]) #Initializing the game window/console
-    panel = libtcod.console_new(constants["screen_width"], constants["panel_height"]) #We initialize the UI panel
+    panel = libtcod.console_new(constants["screen_width"]-30, constants["panel_height"]) #We initialize the UI panel
+    other_bars = libtcod.console_new(12, 6)
 
     player = None
     cursor = None
@@ -66,12 +72,12 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state, name_list, cursor = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state, name_list, cursor = load_game()
+                    player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -80,11 +86,11 @@ def main():
         else:
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, panel, constants, name_list, cursor)
+                con, panel, other_bars, constants, name_list, cursor, name_part_list)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants, name_list, cursor):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, other_bars, constants, name_list, cursor, name_part_list):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -93,14 +99,18 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
     fov_map = initialize_fov(game_map) #Initial state of the fov
     previous_game_state = game_state
     targeting_item = None
+    draw_char_screen = True
+    draw_entity_screen = False
+    analyzed_entity = None
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
             recompute_fov(fov_map, player.x, player.y, constants["fov_radius"], constants["fov_light_walls"], constants["fov_algorithm"])
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
-        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
-            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor)
+        render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
+            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
+            draw_entity_screen)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -124,6 +134,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         chosen_target = action.get("chosen_target")
         look = action.get("look")
         look_cancel = action.get("look_cancel")
+        look_at = action.get("look_at")
+        show_entity_screen = action.get("show_entity_screen")
+        message_archive = action.get("message_archive")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -131,15 +144,31 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         #Player turn logic
         player_turn_results = []
 
+        if show_entity_screen:
+            if draw_entity_screen:
+                draw_entity_screen = False
+            else:
+                draw_entity_screen = True
+                if analyzed_entity == None:
+                    analyzed_entity = player
+
+
         if look:
             previous_game_state = game_state
             game_state = GameStates.LOOK
             cursor.render_order = RenderOrder.UI
             cursor.x, cursor.y = player.x, player.y
-    	
+
         if look_cancel:
             cursor.render_order = RenderOrder.INVISIBLE
             game_state = previous_game_state
+
+        if look_at:
+            for entity in entities:
+                if entity.x == cursor.x and entity.y == cursor.y and entity.render_order != RenderOrder.INVISIBLE:
+                    if entity.fighter:
+                        analyzed_entity = entity
+                        draw_entity_screen = True
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -216,24 +245,37 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 game_state = previous_game_state
 
         if level_up:
-            if level_up == "hp":
-                player.fighter.base_max_hp += 20
-                player.fighter.hp += 20
+            if level_up == "con":
+                player.fighter.character_sheet.constitution += 1
+                player.fighter.base_max_hp += roll(1, 8)[0]
+                if player.fighter.hp + player.fighter.character_sheet.ability_modifiers.get("con") <= player.fighter.max_hp:
+                    player.fighter.hp += player.fighter.character_sheet.ability_modifiers.get("con")
+                else:
+                    player.fighter.hp = player.fighter.max_hp
+                
+
+
             elif level_up == "str":
-                player.fighter.base_power += 1
-            elif level_up == "def":
-                player.fighter.base_defense += 1
+                player.fighter.character_sheet.strenght += 1
+            elif level_up == "dex":
+                player.fighter.character_sheet.dexterity += 1
             
             game_state = previous_game_state
 
         if show_character_screen:
+            if draw_char_screen:
+                draw_char_screen = False
+            else:
+                draw_char_screen = True
+        
+        if message_archive:
             previous_game_state = game_state
-            game_state = GameStates.CHARACTER_SCREEN
+            game_state = GameStates.MESSAGE_ARCHIVE
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.stairs and entity.x == player.x and entity.y == player.y:
-                    entities = game_map.next_floor(player, message_log, constants, name_list)
+                    entities = game_map.next_floor(player, message_log, constants, name_list, name_part_list, cursor)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
                     libtcod.console_clear(con)
@@ -246,12 +288,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         if exit:
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.MESSAGE_ARCHIVE):
                 game_state = previous_game_state
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({"targeting_canceled":True})
             else:
-                save_game(player, entities, game_map, message_log, game_state, name_list, cursor)
+                save_game(player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list)
 
 
                 return True
@@ -315,10 +357,6 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
                     message_log.add_message(Message("Your skills grow stronger! You reached level {}".format(
                         player.level.current_level), libtcod.yellow))
-
-            if show_character_screen:
-                previous_game_state = game_state
-                game_state = GameStates.CHARACTER_SCREEN
 
         #Enemy turn logic
         if game_state == GameStates.ENEMY_TURN:

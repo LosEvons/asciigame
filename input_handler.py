@@ -15,7 +15,20 @@ def handle_keys(key, game_state): #Determines which control-scheme to use
         return handle_character_screen(key)
     elif game_state == GameStates.LOOK:
         return handle_look_keys(key)
+    elif game_state == GameStates.LOOK_AT:
+        return handle_look_at_keys(key)
+    elif game_state == GameStates.MESSAGE_ARCHIVE:
+        return handle_message_archive_keys(key)
 
+    return {}
+
+def handle_message_archive_keys(key):
+    if key:
+        key_char = chr(key.c)
+
+    if key_char == "r" or key.vk == libtcod.KEY_ESCAPE:
+        return{"exit":True}
+    
     return {}
 
 def handle_character_screen(key):
@@ -24,17 +37,23 @@ def handle_character_screen(key):
     
     return {}
 
+def handle_look_at_keys(key):
+    if key.vk == libtcod.KEY_ESCAPE or key.vk == libtcod.KEY_ENTER:
+        return {"exit_look_at":True}
+
+    return {}
+
 
 def handle_level_up_menu(key):
     if key:
         key_char = chr(key.c)
         
         if key_char == 'a':
-            return {"level_up":"hp"}
+            return {"level_up":"con"}
         elif key_char == 'b':
             return {"level_up":"str"}
         elif key_char == 'c':
-            return {"level_up":"def"}
+            return {"level_up":"dex"}
 
     return {}
 
@@ -98,7 +117,6 @@ def handle_look_keys(key):
         return {"cursor_move":(-1,1)}
     elif key_char == 'n' or key.vk == libtcod.KEY_KP3:
         return {"cursor_move":(1,1)}
-    
     elif key.vk == libtcod.KEY_ENTER:
         return {"look_at":True}
     
@@ -169,8 +187,14 @@ def handle_player_turn_keys(key):
 
     elif key_char == 'z':
         return {"wait":True}
+    
+    elif key_char == 'r':
+        return{"message_archive":True}
 
-    if key.vk == libtcod.KEY_ENTER and key.lalt:
+    elif key_char == 'v':
+        return{"show_entity_screen":True}
+
+    elif key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle fullscreen
         return {"fullscreen": True}
 

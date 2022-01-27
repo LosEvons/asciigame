@@ -1,0 +1,24 @@
+[
+    {
+        "white_smiley":1,
+        "black_smiley":2,
+        "black_r_arrow":16,
+        "black_l_arrow":17,
+        "black_u_arrow":30,
+        "black_d_arrow":31,
+        "light_shade":176,
+        "medium_shade":177,
+        "dark_shade":178,
+        "vertical_left_intersection":185,
+        "vertical_wall":186,
+        "right_u_corner":187,
+        "right_d_corner":188,
+        "left_d_corner":200,
+        "left_u_corner":201,
+        "horizontal_up_intersection":202,
+        "horizontal_down_intersection":203,
+        "vertical_right_intersection":204,
+        "horizontal_wall":205,
+        "cross_intersection":206
+    }
+]
