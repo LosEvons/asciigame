@@ -14,21 +14,9 @@ class Equipment:
         self.waist = waist
         self.legs = legs
         self.feet = feet
-        self.bodyparts = [self.main_hand, self.off_hand,  self.head, self.shoulders, self.chest, self.arms, self.right_hand, self.left_hand,
-            self.waist, self.legs, self.feet]
 
     @property
     def max_hp_bonus(self):
-        bonus = 0
-        for part in self.bodyparts:
-            if part and part.equippable:
-                bonus += part.equippable.max_hp_bonus
-        
-        return bonus
-    
-
-    @property
-    def max_hp_bonus2(self):
         bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
@@ -207,5 +195,15 @@ class Equipment:
                     results.append({"dequipped":self.off_hand})
                 self.off_hand = equippable_entity
                 results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.HEAD:
+            if self.head == equippable_entity:
+                self.head = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.head:
+                    results.append({"dequipped":self.head})
+                self.head = equippable_entity
+                results.append({"equipped":equippable_entity})
+
         
         return results

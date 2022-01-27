@@ -152,7 +152,8 @@ class GameMap:
             "1d6sword":from_dungeon_level([[80, 1]], self.dungeon_level),
             "1d8sword":from_dungeon_level([[20, 1]], self.dungeon_level),
             "2d6sword":from_dungeon_level([[20, 1]], self.dungeon_level),
-            "2d8sword":from_dungeon_level([[20, 1]],self.dungeon_level)
+            "2d8sword":from_dungeon_level([[20, 1]],self.dungeon_level),
+            "helmet":from_dungeon_level([[80, 1]], self.dungeon_level)
             }
 
         for i in range(number_of_monsters): #Iterate through all the monsters
@@ -224,8 +225,14 @@ class GameMap:
                         equippable=equippable_component)
             
                 elif item_choice == "shield":
-                    equippable_component = Equippable(EquipmentSlots.OFF_HAND, ac_bonus=2)
+                    equippable_component = Equippable(EquipmentSlots.OFF_HAND, ac_bonus=2, max_hp_bonus=1)
                     item = Entity(x, y, "[", libtcod.darker_orange, Name(name_list, "shield"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
+
+                elif item_choice == "helmet":
+                    equippable_component = Equippable(EquipmentSlots.HEAD, ac_bonus=1, max_hp_bonus=2)
+                    item = Entity(x, y, "^", libtcod.dark_orange, Name(name_list, "shield"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                    
 
                 entities.append(item)
