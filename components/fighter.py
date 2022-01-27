@@ -63,22 +63,22 @@ class Fighter:
         attack_roll = sum(roll(1, 20))
 
         if attack_roll >= target.fighter.ac:
-            results.append({"message":Message("HIT: {} -> {} --to hit-> {} -> {}".format(
-                self.owner.name, attack_roll, target.fighter.ac, target.name))})
+            results.append({"message":Message("{} hit with {}.".format(
+                self.owner.name, attack_roll))})
             damage = self.damage_dice
 
             if damage > 0:
                 results.append({
-                    "message":Message("{} -> {} --damage-> {} - {}".format(
-                        self.owner.name.capitalize(), damage, target.name, target.fighter.hp), libtcod.white)})
+                    "message":Message("{} does {} damage to {} HP:{}".format(
+                        self.owner.name, damage, target.name, target.fighter.hp), libtcod.white)})
                 results.extend(target.fighter.take_damage(damage))
             else:
                 results.append({
-                    "message":Message("{} -> {} --damage-> {} - {}".format(
-                        self.owner.name.capitalize(), damage, target.name, target.fighter.hp), libtcod.white)})
+                    "message":Message("{} does {} damage to {} HP:{}".format(
+                        self.owner.name, damage, target.name, target.fighter.hp), libtcod.white)})
 
         else:
-            results.append({"message":Message("MISS: {} -> {} --to hit-> {} -> {}.".format(
-                self.owner.name, attack_roll, target.name, target.fighter.ac))})
+            results.append({"message":Message("{} missed with {}.".format(
+                self.owner.name, attack_roll))})
         
         return results

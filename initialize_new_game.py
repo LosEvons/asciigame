@@ -18,10 +18,11 @@ from render_functions import RenderOrder
 from components.character_sheet import CharacterSheet
 
 def get_game_variables(constants):
-    fighter_component = Fighter(character_sheet=CharacterSheet(12, 12, 12, 12, 12, 12))
+    fighter_component = Fighter(character_sheet=CharacterSheet(15, 15, 15, 12, 12, 12))
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
+    
     player = Entity(0, 0, "@", libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
         fighter=fighter_component, inventory=inventory_component, level=level_component,
         equipment=equipment_component) #Initializing the player
@@ -34,16 +35,17 @@ def get_game_variables(constants):
     player.equipment.toggle_equip(dagger)
 
     name_list = constants["name_list"]
+    name_part_list = constants["name_part_list"]
 
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
     game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
-        constants["map_width"], constants["map_height"], player, entities, name_list) #Generate the map
+        constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor) #Generate the map
 
     message_log = MessageLog(constants["message_x"], constants["message_width"], constants["message_height"])
 
     game_state = GameStates.PLAYERS_TURN #Gives the initiative to the player
 
-    return player, entities, game_map, message_log, game_state, name_list, cursor
+    return player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list
 
 def get_constants():
     window_title = "Libtcod roguelike"
@@ -57,7 +59,7 @@ def get_constants():
 
     message_x = bar_width + 2
     message_width = screen_width - bar_width - 2
-    message_height = panel_height - 1
+    message_height = panel_height - 2
     
     map_width = screen_width
     map_height = screen_height - panel_height
@@ -71,6 +73,7 @@ def get_constants():
     fov_radius = 10
 
     name_list = get_name_list()
+    name_part_list = get_name_part_list()
 
     special_char_list = get_special_characters()
 
@@ -102,7 +105,8 @@ def get_constants():
         "fov_radius":fov_radius,                        #Size of FOV
         "colors":colors,                                #A list of useful colors
         "name_list":name_list,                          #A list used for dynamic allocation of names to entities
-        "special_char_list":special_char_list
+        "special_char_list":special_char_list,
+        "name_part_list":name_part_list
     }
 
     return constants
@@ -113,6 +117,13 @@ def get_name_list():
     with open(NAME_DATA_FILE, "r") as DATA_FILE:
         name_list = json.load(DATA_FILE)
         return name_list[0]
+
+def get_name_part_list():
+    DATA_FOLDER = "data"
+    NAME_DATA_FILE = os.path.join(DATA_FOLDER, "name_data.json")
+    with open(NAME_DATA_FILE, "r") as DATA_FILE:
+        name_part_list = json.load(DATA_FILE)
+        return name_part_list[1]
 
 def get_special_characters():
     DATA_FOLDER = "data"

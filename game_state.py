@@ -11,3 +11,4 @@ class GameStates(Enum):
     CHARACTER_SCREEN = 8
     LOOK = 9
     LOOK_AT = 10
+    MESSAGE_ARCHIVE = 11

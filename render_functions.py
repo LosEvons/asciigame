@@ -1,7 +1,7 @@
 import tcod as libtcod
 from enum import Enum
 from game_state import GameStates
-from menus import character_screen, fighter_info_screen, inventory_menu, level_up_menu
+from menus import character_screen, fighter_info_screen, inventory_menu, level_up_menu, message_archive_box
 
 class RenderOrder(Enum):
     INVISIBLE = 1
@@ -12,7 +12,7 @@ class RenderOrder(Enum):
     UI = 6
 
 
-def get_names_under_mouse(mouse, entities, fov_map, cursor): #Displays the name of stuff under our mouse on the UI.
+def get_names_under_mouse(mouse, entities, fov_map, cursor,): #Displays the name of stuff under our mouse on the UI.
     (x1, y1, x2, y2) = (mouse.cx, mouse.cy, cursor.x, cursor.y) #Get mouse pos
 
     names = [entity.name for entity in entities
@@ -21,8 +21,9 @@ def get_names_under_mouse(mouse, entities, fov_map, cursor): #Displays the name 
 
     return names.capitalize()
 
-def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color): #Render the HP bar
+def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, game_map): #Render the HP bar
     panel.draw_frame(0, 0, panel.width, panel.height, fg=libtcod.white)
+    panel.print_box(panel.width//2, 0, 34, 1, " Dungeon Level {} ".format(game_map.dungeon_level))
     bar_width = int(float(value) / maximum * total_width) #Define how long the hp bar should be
 
     libtcod.console_set_default_background(panel, back_color)
@@ -59,7 +60,8 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
     
 
 def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
-    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor):
+    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
+    draw_entity_screen):
     if fov_recompute:
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
@@ -97,14 +99,12 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
     libtcod.console_clear(panel) #Clears UI before drawing it again
 
     render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
-        libtcod.light_red, libtcod.darker_grey) #Draws the hp bar
+        libtcod.light_red, libtcod.darker_grey, game_map) #Draws the hp bar
 
     render_enemy_bar(entities, fov_map, game_map, other_bars)
 
-    libtcod.console_print_ex(panel, 2, 6, libtcod.BKGND_NONE, libtcod.LEFT, "Dungeon level: {}".format(game_map.dungeon_level))
-
     libtcod.console_set_default_foreground(panel, libtcod.white)
-    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,  #Draws stuff in the ui when enemy is moused over
+    libtcod.console_print_ex(panel, 2, 6, libtcod.BKGND_NONE, libtcod.LEFT,  #Draws stuff in the ui when enemy is moused over
         get_names_under_mouse(mouse, entities, fov_map, cursor))
 
     y = 1
@@ -112,10 +112,6 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
         libtcod.console_set_default_foreground(panel, message.color) #Draws messages in the UI, and y makes sure older messages get removed and messages stack
         libtcod.console_print_ex(panel, message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
         y += 1
-
-    """libtcod.console_set_default_foreground(con, libtcod.white)                          #Draws HP in the bottom left corner. Left here to be used as a template in the future
-    libtcod.console_print_ex(con, 1, screen_height - 2, libtcod.BKGND_NONE, libtcod.LEFT, 
-        "HP: {0:02}/{1:02}".format(player.fighter.hp, player.fighter.max_hp))"""
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0) #Blit draws stuff onto a hypothetical console. Flushing updates to the newer console.
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y) #Draws our UI element into the console
@@ -134,15 +130,17 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
         level_up_menu(con, "Level up! Choose a stat to raise:", player, 40, 
             screen_width, screen_height)
 
-    if game_state == GameStates.CHARACTER_SCREEN:
+    if draw_char_screen:
         character_screen(player, 30, panel_height, screen_width, screen_height)
     
-    if game_state == GameStates.LOOK_AT:
-        for entity in entities:
-            if entity.x == cursor.x and entity.y == cursor.y and entity.render_order != RenderOrder.INVISIBLE:
-                if entity.fighter:
-                    fighter_info_screen(entity, 30, panel_height, screen_width, screen_height)
+    if draw_entity_screen:
+        if analyzed_entity.render_order == RenderOrder.CORPSE:
+            fighter_info_screen(player, 30, panel_height, screen_width, screen_height, draw_char_screen)
+        else:
+            fighter_info_screen(analyzed_entity, 30, panel_height, screen_width, screen_height, draw_char_screen)
 
+    if game_state == GameStates.MESSAGE_ARCHIVE:
+        message_archive_box(con, message_log.message_archive, screen_width, screen_height)
 
 
 def clear_all(con, entities): #Removes all entities one by one. Might become a source of performance issues. Otherwise we'd also see the previously drawn entities, and this would become an mspaint knockoff.
