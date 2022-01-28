@@ -1,5 +1,6 @@
 import shelve
 import os
+import json
 
 SAVE_GAME = "savegame"
 
@@ -28,16 +29,10 @@ def load_game():
         game_state = data_file["game_state"]
         name_list = data_file["name_list"]
         name_part_list = data_file["name_part_list"]
+
+
     
     player = entities[player_index]
     cursor = entities[cursor_index]
 
     return player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list
-
-def pickle_save_class(obj):
-    return (obj.__class__, obj.__dict__)
-
-def pickle_load_class(cls, attributes):
-    obj = cls.__new__(cls)
-    obj.__dict__.update(attributes)
-    return obj

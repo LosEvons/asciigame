@@ -1,43 +1,46 @@
-from concurrent.futures.process import _check_system_limits
-from equipment_slots import EquipmentSlots
+from equipment_slots import Bodyparts, EquipmentSlots
+from components.equippable import Equippable
 
-class MetaEquipment(type):
-    def __iter__(self):
-        for attr in dir(self):
-            if not attr.startswith("__"):
-                yield attr
-class Equipment(MetaEquipment):
-    def __init__(self, main_hand=None, off_hand=None, head=None, shoulders=None, chest=None, 
-        arms=None, right_hand=None, left_hand=None, waist=None, legs=None, feet=None):
-        self.main_hand = main_hand
-        self.off_hand = off_hand
-        self.head = head
-        self.shoulders = shoulders
-        self.chest = chest
-        self.arms = arms
-        self.right_hand = right_hand
-        self.left_hand = left_hand
-        self.waist = waist
-        self.legs = legs    
-        self.feet = feet
-    
-    def get_iterator(self):
-        return self.__iter__()
+class Equipment():
+    def __init__(self, bodyparts=Bodyparts):
+        self.bodyparts = bodyparts.parts
 
     @property
     def max_hp_bonus(self):
         bonus = 0
-        for part in iter(self):
-            part = getattr(self, part)
-            if part and part.equippable:
-                bonus += part.equippable.max_hp_bonus
+        for key, value in self.bodyparts.items():
+            if value and value.equippable:
+                bonus += value.equippable.max_hp_bonus
+        return bonus
+
+    @property
+    def ac_bonus(self):
+        bonus = 0
+        for key, value in self.bodyparts.items():
+            if value and value.equippable:
+                bonus = value.equippable.max_hp_bonus
         
         return bonus
 
-
+    @property
+    def damage_dice(self):
+        damage_dice = None
+        for key, value in self.bodyparts.items():
+            if value and value.equippable and value.equippable.damage_dice:
+                damage_dice = value.equippable.damage_dice
+        return damage_dice
 
     @property
-    def max_hp_bonus2(self):
+    def damage_bonus(self):
+        damage_bonus = 0
+        for key, value in self.bodyparts.items():
+            if value and value.equippable and value.equippable.damage_bonus:
+                damage_bonus += value.equippable.damage_bonus
+
+        return damage_bonus
+
+    @property
+    def max_hp_bonus1(self):
         bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
@@ -76,7 +79,7 @@ class Equipment(MetaEquipment):
         return bonus
 
     @property
-    def ac_bonus(self):
+    def ac_bonus1(self):
         bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
@@ -115,7 +118,7 @@ class Equipment(MetaEquipment):
         return bonus
 
     @property
-    def damage_dice(self):
+    def damage_dice1(self):
         damage_dice = None
 
         if self.main_hand and self.main_hand.equippable and self.main_hand.equippable.damage_dice:
@@ -154,7 +157,7 @@ class Equipment(MetaEquipment):
         return damage_dice
 
     @property
-    def damage_bonus(self):
+    def damage_bonus1(self):
         damage_bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
@@ -191,9 +194,32 @@ class Equipment(MetaEquipment):
             damage_bonus += self.feet.equippable.damage_bonus
         
         return damage_bonus
-
-
+        
     def toggle_equip(self, equippable_entity):
+        
+        key_list = list(self.bodyparts.keys())
+        value_list = list(self.bodyparts.values())
+
+        results = []
+
+        slot = equippable_entity.equippable.slot
+
+        for slots in EquipmentSlots:
+            slot_index = slots.value-1
+            part = value_list[slot_index]
+            if slot == slots:
+                if part == equippable_entity:
+                    self.bodyparts[key_list[slot_index]] = None
+                    results.append({"dequipped":equippable_entity})
+                else:
+                    if part:
+                        results.append({"dequipped":part})
+                    self.bodyparts[key_list[slot_index]] = equippable_entity
+                    results.append({"equipped":equippable_entity})
+
+        return results
+
+    def toggle_equip1(self, equippable_entity):
         results = []
 
         slot = equippable_entity.equippable.slot

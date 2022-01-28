@@ -6,7 +6,7 @@ import json
 
 from entity import Entity
 from components.fighter import Fighter
-from components.equipment import Equipment, MetaEquipment
+from components.equipment import Equipment
 from game_messages import MessageLog
 from game_state import GameStates
 from components.inventory import Inventory
@@ -21,7 +21,7 @@ def get_game_variables(constants):
     fighter_component = Fighter(character_sheet=CharacterSheet(15, 15, 15, 12, 12, 12))
     inventory_component = Inventory(26)
     level_component = Level()
-    equipment_component = Equipment("player_equipment", (), {})
+    equipment_component = Equipment()
     
     player = Entity(0, 0, "@", libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
         fighter=fighter_component, inventory=inventory_component, level=level_component,

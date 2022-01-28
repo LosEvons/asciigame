@@ -12,3 +12,18 @@ class EquipmentSlots(Enum):
     WAIST = 9
     LEGS = 10
     FEET = 11
+
+class Bodyparts:
+    parts = {
+        "main_hand":None,
+        "off_hand":None,
+        "head":None,
+        "shoulders":None,
+        "chest":None,
+        "arms":None,
+        "right_hand":None,
+        "left_hand":None,
+        "waist":None,
+        "legs":None,
+        "feet":None
+    }
