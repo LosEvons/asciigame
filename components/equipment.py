@@ -1,5 +1,4 @@
 from equipment_slots import Bodyparts, EquipmentSlots
-from components.equippable import Equippable
 
 class Equipment():
     def __init__(self, bodyparts=Bodyparts):
@@ -38,6 +37,30 @@ class Equipment():
                 damage_bonus += value.equippable.damage_bonus
 
         return damage_bonus
+
+    def toggle_equip(self, equippable_entity):
+        
+        key_list = list(self.bodyparts.keys())
+        value_list = list(self.bodyparts.values())
+
+        results = []
+
+        slot = equippable_entity.equippable.slot
+
+        for slots in EquipmentSlots:
+            slot_index = slots.value-1
+            part = value_list[slot_index]
+            if slot == slots:
+                if part == equippable_entity:
+                    self.bodyparts[key_list[slot_index]] = None
+                    results.append({"dequipped":equippable_entity})
+                else:
+                    if part:
+                        results.append({"dequipped":part})
+                    self.bodyparts[key_list[slot_index]] = equippable_entity
+                    results.append({"equipped":equippable_entity})
+
+        return results
 
     @property
     def max_hp_bonus1(self):
@@ -194,30 +217,6 @@ class Equipment():
             damage_bonus += self.feet.equippable.damage_bonus
         
         return damage_bonus
-        
-    def toggle_equip(self, equippable_entity):
-        
-        key_list = list(self.bodyparts.keys())
-        value_list = list(self.bodyparts.values())
-
-        results = []
-
-        slot = equippable_entity.equippable.slot
-
-        for slots in EquipmentSlots:
-            slot_index = slots.value-1
-            part = value_list[slot_index]
-            if slot == slots:
-                if part == equippable_entity:
-                    self.bodyparts[key_list[slot_index]] = None
-                    results.append({"dequipped":equippable_entity})
-                else:
-                    if part:
-                        results.append({"dequipped":part})
-                    self.bodyparts[key_list[slot_index]] = equippable_entity
-                    results.append({"equipped":equippable_entity})
-
-        return results
 
     def toggle_equip1(self, equippable_entity):
         results = []
