@@ -67,7 +67,9 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
             if player.equipment.main_hand == item:
                 options.append("{} {}d{}+{} (on main hand)".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
             elif player.equipment.off_hand == item:
-                options.append("{} {} (on off hand)".format(item.name, item.equippable.ac_bonus))
+                options.append("{} {}AC&{}HP (on off hand)".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
+            elif player.equipment.head == item:
+                options.append("{} {}AC&{}HP (on head)".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
             elif item not in options and item.equippable:
                 if item.equippable.ac_bonus:
                     options.append("{} {}".format(item.name, item.equippable.ac_bonus))
@@ -144,4 +146,125 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
         y = screen_height - char_screen_height
 
     libtcod.console_blit(window, 0, 0, char_screen_width, char_screen_height,
+        0, x, y, 1.0, 0.7)
+
+def equipment_info_screen(player, eqp_screen_width, eqp_screen_height, 
+    screen_width, screen_height, draw_entity_screen, draw_character_screen, other_panel_height):
+
+    window = libtcod.console_new(eqp_screen_width, eqp_screen_height)
+
+    if draw_entity_screen and draw_character_screen:
+        x = screen_width - eqp_screen_width
+        y = 0
+        eqp_screen_height -= other_panel_height * 2
+    elif draw_entity_screen or draw_character_screen:
+        x = screen_width - eqp_screen_width
+        y = 0
+        eqp_screen_height -= other_panel_height
+    else:
+        x = screen_width - eqp_screen_width
+        y = 0
+
+    window.draw_frame(0, 0, eqp_screen_width, eqp_screen_height)
+
+    libtcod.console_set_default_foreground(window, libtcod.white)
+    libtcod.console_print_rect_ex(window, 1, 1, eqp_screen_width, eqp_screen_height,
+        libtcod.BKGND_NONE, libtcod.LEFT, "Equipment")
+    if player.equipment.head:
+        libtcod.console_print_rect_ex(window, 1, 2, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Head: '{}'".format(player.equipment.head.name))
+        libtcod.console_print_rect_ex(window, 3, 3, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.head.equippable.ac_bonus, player.equipment.head.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 2, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Head: None")
+
+    if player.equipment.main_hand:
+        libtcod.console_print_rect_ex(window, 1, 4, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Main-Hand: '{}'".format(player.equipment.main_hand.name))
+        libtcod.console_print_rect_ex(window, 3, 5, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "-{}d{}+{}".format(player.equipment.main_hand.equippable.damage_dice[0],player.equipment.main_hand.equippable.damage_dice[1], 
+            player.equipment.main_hand.equippable.damage_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 4, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Main-Hand: None")
+
+    if player.equipment.off_hand:
+        libtcod.console_print_rect_ex(window, 1, 6, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Off-Hand: {}".format(player.equipment.off_hand.name))
+        libtcod.console_print_rect_ex(window, 3, 7, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.off_hand.equippable.ac_bonus, player.equipment.off_hand.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 6, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Off-Hand: None")
+
+    if player.equipment.shoulders:
+        libtcod.console_print_rect_ex(window, 1, 8, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Shoulders: {}".format(player.equipment.shoulders.name))
+        libtcod.console_print_rect_ex(window, 3, 9, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.shoulders.equippable.ac_bonus,
+            player.equipment.shoulders.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 8, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Shoulders: None")
+    
+    if player.equipment.shoulders:
+        libtcod.console_print_rect_ex(window, 1, 10, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Chest: {}".format(player.equipment.chest.name))
+        libtcod.console_print_rect_ex(window, 3, 11, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.chest.equippable.ac_bonus,
+            player.equipment.chest.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 10, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Chest: None")
+
+    if player.equipment.arms:
+        libtcod.console_print_rect_ex(window, 1, 12, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Arms: {}".format(player.equipment.arms.name))
+        libtcod.console_print_rect_ex(window, 3, 13, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.arms.equippable.ac_bonus,
+            player.equipment.arms.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 12, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Arms: None")
+    
+    if player.equipment.right_hand:
+        libtcod.console_print_rect_ex(window, 1, 14, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Ring: {}".format(player.equipment.right_hand.name))
+        libtcod.console_print_rect_ex(window, 3, 15, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.right_arm.equippable.ac_bonus,
+            player.equipment.right_arm.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 14, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Ring: None")
+    
+    if player.equipment.waist:
+        libtcod.console_print_rect_ex(window, 1, 16, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Waist: {}".format(player.equipment.waist.name))
+        libtcod.console_print_rect_ex(window, 3, 17, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.waist.equippable.ac_bonus,
+            player.equipment.waist.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 16, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Waist: None")
+    
+    if player.equipment.legs:
+        libtcod.console_print_rect_ex(window, 1, 18, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Legs: {}".format(player.equipment.legs.name))
+        libtcod.console_print_rect_ex(window, 3, 19, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.legs.equippable.ac_bonus,
+            player.equipment.legs.equippable.max_hp_bonus))
+    else:
+        libtcod.console_print_rect_ex(window, 1, 18, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Legs: None")
+
+    if player.equipment.feet:
+        libtcod.console_print_rect_ex(window, 1, 20, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "Feet: {}".format(player.equipment.feet.name))
+        libtcod.console_print_rect_ex(window, 3, 21, eqp_screen_width, eqp_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.feet.equippable.ac_bonus,
+            player.equipment.feet.equippable.max_hp_bonus))
+
+
+    libtcod.console_blit(window, 0, 0, eqp_screen_width, eqp_screen_height,
         0, x, y, 1.0, 0.7)

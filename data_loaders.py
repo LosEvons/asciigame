@@ -13,6 +13,7 @@ def save_game(player, entities, game_map, message_log, game_state, name_list, cu
         data_file["game_state"] = game_state
         data_file["name_list"] = name_list
         data_file["name_part_list"] = name_part_list
+        
 
 def load_game():
     if not os.path.isfile(SAVE_GAME + ".dat"):
@@ -32,3 +33,11 @@ def load_game():
     cursor = entities[cursor_index]
 
     return player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list
+
+def pickle_save_class(obj):
+    return (obj.__class__, obj.__dict__)
+
+def pickle_load_class(cls, attributes):
+    obj = cls.__new__(cls)
+    obj.__dict__.update(attributes)
+    return obj

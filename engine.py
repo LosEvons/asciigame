@@ -24,6 +24,7 @@ BACKGROUND_FILE = os.path.join(DATA_FOLDER, "bground.jpg")
 
 
 def main():
+    print("#############################################")
     constants = get_constants()
         
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD) #Configuring the font
@@ -101,6 +102,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
     targeting_item = None
     draw_char_screen = True
     draw_entity_screen = False
+    draw_eqp_screen = False
     analyzed_entity = None
 
     while not libtcod.console_is_window_closed(): #Main loop
@@ -110,7 +112,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
 
         render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
             constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
-            draw_entity_screen)
+            draw_entity_screen, draw_eqp_screen)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -137,6 +139,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         look_at = action.get("look_at")
         show_entity_screen = action.get("show_entity_screen")
         message_archive = action.get("message_archive")
+        show_eqp_screen = action.get("show_eqp_screen")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -151,6 +154,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
                 draw_entity_screen = True
                 if analyzed_entity == None:
                     analyzed_entity = player
+
+        if show_eqp_screen:
+            if draw_eqp_screen:
+                draw_eqp_screen = False
+            else:
+                draw_eqp_screen = True
 
 
         if look:

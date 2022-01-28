@@ -1,6 +1,12 @@
+from concurrent.futures.process import _check_system_limits
 from equipment_slots import EquipmentSlots
 
-class Equipment:
+class MetaEquipment(type):
+    def __iter__(self):
+        for attr in dir(self):
+            if not attr.startswith("__"):
+                yield attr
+class Equipment(MetaEquipment):
     def __init__(self, main_hand=None, off_hand=None, head=None, shoulders=None, chest=None, 
         arms=None, right_hand=None, left_hand=None, waist=None, legs=None, feet=None):
         self.main_hand = main_hand
@@ -12,11 +18,26 @@ class Equipment:
         self.right_hand = right_hand
         self.left_hand = left_hand
         self.waist = waist
-        self.legs = legs
+        self.legs = legs    
         self.feet = feet
+    
+    def get_iterator(self):
+        return self.__iter__()
 
     @property
     def max_hp_bonus(self):
+        bonus = 0
+        for part in iter(self):
+            part = getattr(self, part)
+            if part and part.equippable:
+                bonus += part.equippable.max_hp_bonus
+        
+        return bonus
+
+
+
+    @property
+    def max_hp_bonus2(self):
         bonus = 0
 
         if self.main_hand and self.main_hand.equippable:
@@ -203,6 +224,60 @@ class Equipment:
                 if self.head:
                     results.append({"dequipped":self.head})
                 self.head = equippable_entity
+                results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.SHOULDERS:
+            if self.shoulders == equippable_entity:
+                self.shoulders = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.shoulders:
+                    results.append({"dequipped":self.shoulders})
+                self.shoulders = equippable_entity
+                results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.CHEST:
+            if self.chest == equippable_entity:
+                self.chest = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.chest:
+                    results.append({"dequipped":self.chest})
+                self.chest = equippable_entity
+                results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.ARMS:
+            if self.arms == equippable_entity:
+                self.arms = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.arms:
+                    results.append({"dequipped":self.arms})
+                self.arms = equippable_entity
+                results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.WAIST:
+            if self.waist == equippable_entity:
+                self.waist = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.waist:
+                    results.append({"dequipped":self.waist})
+                self.waist = equippable_entity
+                results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.LEGS:
+            if self.legs == equippable_entity:
+                self.legs = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.legs:
+                    results.append({"dequipped":self.legs})
+                self.legs = equippable_entity
+                results.append({"equipped":equippable_entity})
+        elif slot == EquipmentSlots.FEET:
+            if self.feet == equippable_entity:
+                self.feet = None
+                results.append({"dequipped":equippable_entity})
+            else:
+                if self.feet:
+                    results.append({"dequipped":self.feet})
+                self.feet = equippable_entity
                 results.append({"equipped":equippable_entity})
 
         
