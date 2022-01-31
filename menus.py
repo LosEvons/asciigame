@@ -63,21 +63,29 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
         options = ["Inventory is empty."]
     else:
         options = []
+        handled_items = []
+
         for item in player.inventory.items:
-            if player.equipment.main_hand == item:
-                options.append("{} {}d{}+{} (on main hand)".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
-            elif player.equipment.off_hand == item:
-                options.append("{} {}AC&{}HP (on off hand)".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
-            elif player.equipment.head == item:
-                options.append("{} {}AC&{}HP (on head)".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
-            elif item not in options and item.equippable:
-                if item.equippable.ac_bonus:
-                    options.append("{} {}".format(item.name, item.equippable.ac_bonus))
-                elif item.equippable.damage_dice:
+            for key, value in player.equipment.bodyparts.items():
+                if value == item:
+                    if item.equippable.damage_dice:
+                        handled_items.append(item)
+                        options.append("{} {}d{}+{} (in {})".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus, key))
+                    elif item.equippable.ac_bonus or item.equippable.max_hp_bonus:
+                        handled_items.append(item)
+                        options.append("{} +{}AC&+{}HP (in {})".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus, key))
+
+            if item not in handled_items and item.equippable:
+                if item.equippable.damage_dice:
+                    handled_items.append(item)
                     options.append("{} {}d{}+{}".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
-            else:
+                elif item.equippable.ac_bonus or item.equippable.max_hp_bonus:
+                    handled_items.append(item)
+                    options.append("{} +{}AC&+{}HP".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
+            
+            elif item not in handled_items:
+                handled_items.append(item)
                 options.append(item.name)
-        #options = [item.name for item in inventory.items]
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
@@ -164,9 +172,31 @@ def equipment_info_screen(player, eqp_screen_width, eqp_screen_height,
     else:
         x = screen_width - eqp_screen_width
         y = 0
-
+    
     window.draw_frame(0, 0, eqp_screen_width, eqp_screen_height)
 
+    rows = 0
+    for key, value in player.equipment.bodyparts.items():
+        if value:
+            if value.equippable and value.equippable.damage_dice:
+                libtcod.console_print_rect_ex(window, 1, rows+1, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "{}: '{}'".format(key.capitalize(), value.name))
+                libtcod.console_print_rect_ex(window, 3, rows+2, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "-{}d{}+{}".format(value.equippable.damage_dice[0], value.equippable.damage_dice[1], 
+                    value.equippable.damage_bonus))
+            else:
+                libtcod.console_print_rect_ex(window, 1, rows+1, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "{}: '{}'".format(key.capitalize(), value.name))
+                libtcod.console_print_rect_ex(window, 3, rows+2, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC&+{}HP".format(value.equippable.ac_bonus, value.equippable.max_hp_bonus))
+            
+            rows += 2
+
+        libtcod.console_blit(window, 0, 0, eqp_screen_width, eqp_screen_height,
+        0, x, y, 1.0, 0.7)
+"""
+
+    
     libtcod.console_set_default_foreground(window, libtcod.white)
     libtcod.console_print_rect_ex(window, 1, 1, eqp_screen_width, eqp_screen_height,
         libtcod.BKGND_NONE, libtcod.LEFT, "Equipment")
@@ -262,9 +292,9 @@ def equipment_info_screen(player, eqp_screen_width, eqp_screen_height,
         libtcod.console_print_rect_ex(window, 1, 20, eqp_screen_width, eqp_screen_height,
             libtcod.BKGND_NONE, libtcod.LEFT, "Feet: {}".format(player.equipment.feet.name))
         libtcod.console_print_rect_ex(window, 3, 21, eqp_screen_width, eqp_screen_height,
-            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.feet.equippable.ac_bonus,
-            player.equipment.feet.equippable.max_hp_bonus))
+            libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC & +{}HP".format(player.equipment.bodyparts.feet.equippable.ac_bonus,
+            player.equipment.bodyparts.feet.equippable.max_hp_bonus))
 
 
     libtcod.console_blit(window, 0, 0, eqp_screen_width, eqp_screen_height,
-        0, x, y, 1.0, 0.7)
+        0, x, y, 1.0, 0.7)"""
