@@ -148,12 +148,18 @@ class GameMap:
             "lightning_scroll":from_dungeon_level([[25, 4]], self.dungeon_level), 
             "fireball_scroll":from_dungeon_level([[25, 1]], self.dungeon_level), 
             "confusion_scroll":from_dungeon_level([[25, 1]], self.dungeon_level),
-            "shield":from_dungeon_level([[80, 1]], self.dungeon_level),
-            "1d6sword":from_dungeon_level([[80, 1]], self.dungeon_level),
-            "1d8sword":from_dungeon_level([[20, 1]], self.dungeon_level),
-            "2d6sword":from_dungeon_level([[20, 1]], self.dungeon_level),
-            "2d8sword":from_dungeon_level([[20, 1]],self.dungeon_level),
-            "helmet":from_dungeon_level([[80, 1]], self.dungeon_level)
+            "shield":from_dungeon_level([[60, 1], [10, 2], [0, 3]], self.dungeon_level),
+            "1d6sword":from_dungeon_level([[40, 1], [10, 2], [0, 3]], self.dungeon_level),
+            "1d8sword":from_dungeon_level([[30, 2], [10, 3], [5 ,4], [0, 5]], self.dungeon_level),
+            "2d6sword":from_dungeon_level([[20, 4]], self.dungeon_level),
+            "2d8sword":from_dungeon_level([[10, 6]],self.dungeon_level),
+            "helmet":from_dungeon_level([[60, 1], [10, 2], [0, 3]], self.dungeon_level),
+            "shoulderpads":from_dungeon_level([[15, 4], [10, 5], [0, 7]], self.dungeon_level),
+            "chestplate":from_dungeon_level([[5, 5], [15, 6], [0, 8]], self.dungeon_level),
+            "armguards":from_dungeon_level([[15, 3], [5, 4], [0, 6]], self.dungeon_level),
+            "belt":from_dungeon_level([[10, 1], [20, 3], [0, 5]], self.dungeon_level),
+            "bracers":from_dungeon_level([[10, 1], [25, 3], [0, 4]], self.dungeon_level),
+            "boots":from_dungeon_level([[10, 2], [15, 3], [10, 3], [0, 5]], self.dungeon_level)
             }
 
         for i in range(number_of_monsters): #Iterate through all the monsters
@@ -231,8 +237,38 @@ class GameMap:
 
                 elif item_choice == "helmet":
                     equippable_component = Equippable(EquipmentSlots.HEAD, ac_bonus=1, max_hp_bonus=2)
-                    item = Entity(x, y, "^", libtcod.dark_orange, Name(name_list, "shield"), render_order=RenderOrder.ITEM,
+                    item = Entity(x, y, "^", libtcod.dark_orange, Name(name_list, "helmet"), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
-                    
+
+                elif item_choice == "chestplate":
+                    equippable_component = Equippable(EquipmentSlots.CHEST, ac_bonus=0, max_hp_bonus=randint(0, 20))
+                    item = Entity(x, y, "c", libtcod.dark_orange, Name(name_list, "chestplate"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                
+                elif item_choice == "shoulderpads":
+                    equippable_component = Equippable(EquipmentSlots.SHOULDERS, ac_bonus=1, max_hp_bonus=0)
+                    item = Entity(x, y, "s", libtcod.dark_orange, Name(name_list, "shoulderpads"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                
+                elif item_choice == "armguards":
+                    equippable_component = Equippable(EquipmentSlots.ARMS, ac_bonus=1, max_hp_bonus=2)
+                    item = Entity(x, y, "a", libtcod.dark_orange, Name(name_list, "armguards"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                
+                elif item_choice == "belt":
+                    equippable_component = Equippable(EquipmentSlots.WAIST, ac_bonus=1, max_hp_bonus=3)
+                    item = Entity(x, y, "B", libtcod.dark_orange, Name(name_list, "belt"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                
+                elif item_choice == "bracers":
+                    equippable_component = Equippable(EquipmentSlots.LEGS, ac_bonus=0, max_hp_bonus=randint(0, 15))
+                    item = Entity(x, y, "p", libtcod.dark_orange, Name(name_list, "bracers"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                
+                elif item_choice == "boots":
+                    equippable_component = Equippable(EquipmentSlots.FEET, ac_bonus=1, max_hp_bonus=2)
+                    item = Entity(x, y, "b", libtcod.dark_orange, Name(name_list, "boots"), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+                
 
                 entities.append(item)

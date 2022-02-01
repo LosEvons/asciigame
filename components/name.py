@@ -29,6 +29,56 @@ def Name(name_list, type):
         #sword_names.remove(chosen_name)
         #name_list["sword_names"] = sword_names
         return chosen_name
+    
+    elif type == "helmet":
+        helmet_names = name_list.get("helmet_names")
+        chosen_name = choice(helmet_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+
+    elif type == "shoulderpads":
+        shoulderpad_names = name_list.get("shoulderpad_names")
+        chosen_name = choice(shoulderpad_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+
+    elif type == "chestplate":
+        chestplate_names = name_list.get("chestplate_names")
+        chosen_name = choice(chestplate_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+    
+    elif type == "armguards":
+        armguard_names = name_list.get("armguard_names")
+        chosen_name = choice(armguard_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+    
+    elif type == "belt":
+        belt_names = name_list.get("belt_names")
+        chosen_name = choice(belt_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+    
+    elif type == "bracers":
+        bracer_names = name_list.get("bracer_names")
+        chosen_name = choice(bracer_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+    
+    elif type == "boots":
+        boot_names = name_list.get("boot_names")
+        chosen_name = choice(boot_names)
+        #sword_names.remove(chosen_name)
+        #name_list["sword_names"] = sword_names
+        return chosen_name
+
 
 
 def name_from_parts(name_part_list):

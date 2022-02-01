@@ -3,7 +3,14 @@
     "goblin_names":["James", "Steve", "Raul", "Matt", "Digby", "Trevor", "Kevin", "Daniel", "David", "Richard"],
     "hydra_names":["Matti", "Teppo", "Pasi", "Timo", "Reiska", "Taavi", "Jarno", "Tarmo", "Veeti", "Jaakko"],
     "sword_names":["Excalibur", "Frostmourne", "Sword of Fathoms", "Silverlight", "Starrazor"],
-    "shield_names":["Trash Can Cover", "Cast-Iron Pan", "Wooden Plank", "Restaurant Tray"]
+    "shield_names":["Trash Can Cover", "Cast-Iron Pan", "Wooden Plank", "Restaurant Tray"],
+    "helmet_names":["Helmet"],
+    "shoulderpad_names":["Shoulderpad"],
+    "chestplate_names":["Chestplate"],
+    "armguard_names":["Armguards"],
+    "belt_names":["Belt"],
+    "bracer_names":["Pants"],
+    "boot_names":["Boots"]
     },
     {
     "first_names":["James", "Jim", "Carl", "Bella", "Bart", "Sean", "Shawn", "Steve", "Raul", "Fjord", "Caleb", "Percival", "Daniel", "Lee", "David"],

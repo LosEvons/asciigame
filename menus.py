@@ -6,6 +6,7 @@ def message_box(con, header, width, screen_width, screen_height):
 def message_archive_box(con, message_archive, screen_width, screen_height):
     window = libtcod.console_new(screen_width, screen_height)
     y = screen_height -2
+    message_archive = list(reversed(message_archive))
     for message in message_archive:
         if y == 0:
             break
@@ -181,16 +182,16 @@ def equipment_info_screen(player, eqp_screen_width, eqp_screen_height,
             if value.equippable and value.equippable.damage_dice:
                 libtcod.console_print_rect_ex(window, 1, rows+1, eqp_screen_width, eqp_screen_height,
                     libtcod.BKGND_NONE, libtcod.LEFT, "{}: '{}'".format(key.capitalize(), value.name))
-                libtcod.console_print_rect_ex(window, 3, rows+2, eqp_screen_width, eqp_screen_height,
+                libtcod.console_print_rect_ex(window, 2, rows+2, eqp_screen_width, eqp_screen_height,
                     libtcod.BKGND_NONE, libtcod.LEFT, "-{}d{}+{}".format(value.equippable.damage_dice[0], value.equippable.damage_dice[1], 
                     value.equippable.damage_bonus))
             else:
                 libtcod.console_print_rect_ex(window, 1, rows+1, eqp_screen_width, eqp_screen_height,
                     libtcod.BKGND_NONE, libtcod.LEFT, "{}: '{}'".format(key.capitalize(), value.name))
-                libtcod.console_print_rect_ex(window, 3, rows+2, eqp_screen_width, eqp_screen_height,
+                libtcod.console_print_rect_ex(window, 2, rows+2, eqp_screen_width, eqp_screen_height,
                     libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC&+{}HP".format(value.equippable.ac_bonus, value.equippable.max_hp_bonus))
             
-            rows += 2
+            rows += 3
 
         libtcod.console_blit(window, 0, 0, eqp_screen_width, eqp_screen_height,
         0, x, y, 1.0, 0.7)
