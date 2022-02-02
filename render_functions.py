@@ -1,7 +1,8 @@
 import tcod as libtcod
+import numpy as np
 from enum import Enum
 from game_state import GameStates
-from menus import character_screen, equipment_info_screen, fighter_info_screen, inventory_menu, level_up_menu, message_archive_box
+from menus import character_screen, equipment_info_screen, fighter_info_screen, inventory_menu, level_up_menu, message_archive_box, stat_info_screen
 
 class RenderOrder(Enum):
     INVISIBLE = 1
@@ -49,7 +50,7 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
                     libtcod.LEFT, bar_background)
                 hp_str = ""
                 percentage = entity.fighter.hp / entity.fighter.max_hp
-                hp_to_draw = int(percentage * 10)
+                hp_to_draw = int(np.ceil(percentage * 10))
                 libtcod.console_set_default_foreground(other_bars, libtcod.red)
                 for i in range (hp_to_draw):
                     hp_str += "O"
@@ -61,7 +62,7 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
 
 def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
     screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
-    draw_entity_screen, draw_eqp_screen):
+    draw_entity_screen, draw_eqp_screen, draw_stat_screen):
     if fov_recompute:
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
@@ -143,7 +144,12 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
         message_archive_box(con, message_log.message_archive, screen_width, screen_height)
     
     if draw_eqp_screen:
-        equipment_info_screen(player, 30, screen_height, screen_width, screen_height, draw_entity_screen, draw_char_screen, panel_height)
+        equipment_info_screen(player, 30, screen_height, screen_width, screen_height, 
+            draw_entity_screen, draw_char_screen, panel_height)
+    
+    if draw_stat_screen:
+        stat_info_screen(player, 30, screen_height, screen_width, screen_height, draw_entity_screen, 
+            draw_char_screen, draw_eqp_screen, panel_height)
 
 
 def clear_all(con, entities): #Removes all entities one by one. Might become a source of performance issues. Otherwise we'd also see the previously drawn entities, and this would become an mspaint knockoff.

@@ -45,10 +45,10 @@ def menu(con, header, options, width, screen_width, screen_height):
 
 
     libtcod.console_set_default_foreground(window, libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 1, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
 
-    y = header_height
     letter_index = ord('a')
+    y = header_height
     for option_text in options:
         text = "(" + chr(letter_index) + ") " + option_text
         libtcod.console_print_ex(window, 1, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
@@ -194,4 +194,35 @@ def equipment_info_screen(player, eqp_screen_width, eqp_screen_height,
             rows += 3
 
         libtcod.console_blit(window, 0, 0, eqp_screen_width, eqp_screen_height,
+        0, x, y, 1.0, 0.7)
+
+def stat_info_screen(player, stat_screen_width, stat_screen_height, 
+    screen_width, screen_height, draw_entity_screen, draw_character_screen, draw_eqp_screen, other_panel_height):
+
+    window = libtcod.console_new(stat_screen_width, stat_screen_height)
+    if draw_eqp_screen:
+        x = screen_width - stat_screen_width * 2
+        y = 0
+        stat_screen_height -= other_panel_height
+    elif draw_entity_screen and draw_character_screen:
+        x = screen_width - stat_screen_width
+        y = 0
+        stat_screen_height -= other_panel_height * 2
+    elif draw_entity_screen or draw_character_screen:
+        x = screen_width - stat_screen_width
+        y = 0
+        stat_screen_height -= other_panel_height
+    else:
+        x = screen_width - stat_screen_width
+        y = 0
+    
+    window.draw_frame(0, 0, stat_screen_width, stat_screen_height)
+
+    rows = 0
+    for key, value in player.fighter.character_sheet.ability_scores.items():
+        libtcod.console_print_rect_ex(window, 1, rows+1, stat_screen_width, stat_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "{} = {}".format(key.capitalize(), value))
+        rows += 1
+
+        libtcod.console_blit(window, 0, 0, stat_screen_width, stat_screen_height,
         0, x, y, 1.0, 0.7)

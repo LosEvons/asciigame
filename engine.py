@@ -104,6 +104,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
     draw_entity_screen = False
     draw_eqp_screen = False
     analyzed_entity = None
+    draw_stat_screen = False
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
@@ -112,7 +113,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
 
         render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
             constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
-            draw_entity_screen, draw_eqp_screen)
+            draw_entity_screen, draw_eqp_screen, draw_stat_screen)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -140,6 +141,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         show_entity_screen = action.get("show_entity_screen")
         message_archive = action.get("message_archive")
         show_eqp_screen = action.get("show_eqp_screen")
+        show_stat_screen = action.get("show_stat_screen")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -160,6 +162,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
                 draw_eqp_screen = False
             else:
                 draw_eqp_screen = True
+        
+        if show_stat_screen:
+            if draw_stat_screen:
+                draw_stat_screen = False
+            else:
+                draw_stat_screen = True
 
 
         if look:
