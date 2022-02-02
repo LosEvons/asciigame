@@ -7,7 +7,7 @@ from equipment_slots import EquipmentSlots
 from game_messages import Message
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
-from random import randint
+from random import randint, choice
 import tcod as libtcod
 from entity import Entity
 from render_functions import RenderOrder
@@ -41,7 +41,58 @@ class GameMap:
             "right":self.tiles[x+1][y]
         }
         return adjacent_tiles
-      
+    
+    def make_surface_map(self, max_buildings, building_min_size, building_max_size, map_width, map_height,
+        player, entities, name_list, name_part_list, cursor):
+        buildings = []
+        num_buildings = 0
+
+        center_of_last_room_x = None
+        center_of_last_room_y = None
+
+        for x in range(map_width-2):
+            for y in range(map_height-2):
+                self.tiles[x+1][y+1].blocked = False
+                self.tiles[x+1][y+1].block_sight = False
+
+        for b in range(max_buildings):
+            w = randint(building_min_size, building_max_size)
+            h = randint(building_min_size, building_max_size)
+            x = randint(0, map_width - w - 1)
+            y = randint(0, map_height - h - 1)
+
+            new_building = Rect(x, y, w, h)
+
+            for other_building in buildings:
+                if new_building.intersect(other_building):
+                    break
+            else:
+                self.create_building(new_building)
+                (new_x, new_y) = new_building.center()
+
+                center_of_last_room_x = new_x
+                center_of_last_room_y = new_y
+
+                if num_buildings == 0:
+                    player.x = new_x
+                    player.y = new_y
+
+                self.place_entities(new_building, entities, name_list, name_part_list)
+                buildings.append(new_building)
+                num_buildings += 1
+        
+        for building in buildings:
+            for othr_bldn in buildings:
+                if building.intersect(othr_bldn):
+                    shared_tiles = building.get_shared_tiles(othr_bldn)
+                    print(shared_tiles)
+            
+        stairs_component = Stairs(self.dungeon_level +1)
+        down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, 
+            '>', libtcod.white, "Stairs", render_order=RenderOrder.STAIRS, 
+            stairs=stairs_component)
+        entities.append(down_stairs)
+
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, 
         player, entities, name_list, name_part_list, cursor):
@@ -56,8 +107,8 @@ class GameMap:
             w = randint(room_min_size, room_max_size)
             h = randint(room_min_size, room_max_size)
             # random position without going out of the boundaries of the map
-            x = randint(0, map_width - w - 1)
-            y = randint(0, map_height - h - 1)
+            x = randint(0, map_width - w)
+            y = randint(0, map_height - h )
 
             new_room = Rect(x, y, w, h) #We make a new room template.
 
@@ -114,6 +165,30 @@ class GameMap:
             for y in range (room.y1 + 1, room.y2):
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
+    
+    def create_building(self, building):
+        for x in range(building.x1, building.x2 + 1):
+            self.tiles[x][building.y1].blocked = True
+            self.tiles[x][building.y1].block_sight = True
+            self.tiles[x][building.y2].blocked = True
+            self.tiles[x][building.y2].block_sight = True
+        for y in range(building.y1, building.y2 + 1):
+            self.tiles[building.x1][y].blocked = True
+            self.tiles[building.x1][y].block_sight = True
+            self.tiles[building.x2][y].blocked = True
+            self.tiles[building.x2][y].block_sight = True
+
+        for x in range(building.x1 + 2, building.x2 - 1):
+            for y in range(building.y1 + 2, building.y2 - 1):
+                self.tiles[x][y].blocked = False
+                self.tiles[x][y].block_sight = False
+
+        while True:
+            door = choice(choice(building.edge))
+            if door not in (building.tl_corner, building.tr_corner, building.bl_corner, building.br_corner):
+                self.tiles[door[0]][door[1]].blocked = False
+                self.tiles[door[0]][door[1]].block_sight = False
+                break
 
     def create_h_tunnel(self, x1, x2, y): #Changes the tile type in a x1*x2+1 space. This is used to make small restricted hallways.
         for x in range(min(x1, x2), max(x1, x2) + 1):
