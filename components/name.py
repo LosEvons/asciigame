@@ -84,9 +84,12 @@ def Name(name_list, type):
 def name_from_parts(name_part_list):
     first_names = name_part_list.get("first_names")
     first_name = choice(first_names)
+
     first_syllable = choice(name_part_list.get("syllables"))
     second_syllable = choice(name_part_list.get("syllables"))
     connector = choice(name_part_list.get("consonants"))
+
     surname = first_syllable + connector + second_syllable
     final_name = first_name + " " + surname.capitalize()
+    
     return final_name

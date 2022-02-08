@@ -1,3 +1,4 @@
+from re import I
 import tcod as libtcod
 
 from random import randint
@@ -37,5 +38,25 @@ class ConfusedMonster:
         else:
             self.owner.ai = self.previous_ai
             results.append({"message":Message("The {} is no longer confused".format(self.owner.name), libtcod.red)})
+        
+        return results
+
+class PartyMember:
+    def __init__ (self, player):
+        self.parent_previous_coordinates = None
+        self.parent_current_coordinates = (player.x, player.y)
+
+    def take_turn(self, player, fov_map, game_map, entities):
+        results = []
+        party_member = self.owner
+
+        self.parent_previous_coordinates = self.parent_current_coordinates
+        self.parent_current_coordinates = (player.x, player.y)
+
+        if self.parent_previous_coordinates != self.parent_current_coordinates:
+            party_member.x = self.parent_previous_coordinates[0]
+            party_member.y = self.parent_previous_coordinates[1]
+        else:
+            self.parent_current_coordinates = (player.x, player.y)
         
         return results

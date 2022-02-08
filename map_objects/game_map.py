@@ -1,7 +1,7 @@
 from components.character_sheet import CharacterSheet
 from components.equipment import Equipment
 from components.equippable import Equippable
-from components.ai import BasicMonster
+from components.ai import BasicMonster, PartyMember
 from components.fighter import Fighter
 from equipment_slots import EquipmentSlots
 from game_messages import Message
@@ -78,7 +78,7 @@ class GameMap:
                     player.x = new_x
                     player.y = new_y
 
-                self.place_entities(new_building, entities, name_list, name_part_list)
+                self.place_entities(new_building, entities, name_list, name_part_list, player)
                 buildings.append(new_building)
                 num_buildings += 1
         
@@ -140,7 +140,7 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                self.place_entities(new_room, entities, name_list, name_part_list) #Here we generate entities for each room
+                self.place_entities(new_room, entities, name_list, name_part_list, player) #Here we generate entities for each room
                 rooms.append(new_room) #Finally we add the room to our index and mark it in the room counter
                 num_rooms += 1
         stairs_component = Stairs(self.dungeon_level +1)
@@ -209,16 +209,20 @@ class GameMap:
 
         return False
 
-    def place_entities(self, room, entities, name_list, name_part_list): #Randomly decides a place in the room for our monsters
+    def place_entities(self, room, entities, name_list, name_part_list, player): #Randomly decides a place in the room for our monsters
         max_monsters_per_room = from_dungeon_level([[1, 1], [3, 4], [5, 6]], self.dungeon_level)
         max_items_per_room = from_dungeon_level([[2, 1], [2, 4]], self.dungeon_level)
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
         number_of_items = randint(0, max_items_per_room)
 
         monster_chances = {
-            "hound":from_dungeon_level([[80, 1], [50, 2], [10, 3], [0, 4]], self.dungeon_level),
-            "goblin":from_dungeon_level([[50, 2], [80, 3]], self.dungeon_level), 
-            "hydra":from_dungeon_level([[15, 3], [30, 5], [60, 7]], self.dungeon_level)
+            "hound":from_dungeon_level([[10, 1],[80, 2], [50, 3], [10, 4], [0, 5]], self.dungeon_level),
+            "goblin":from_dungeon_level([[50, 3], [80, 4]], self.dungeon_level),
+            "hydra":from_dungeon_level([[15, 4], [30, 6], [60, 8]], self.dungeon_level)
+            }
+        
+        npc_chances = {
+            "party_member":from_dungeon_level([[100, 1], [0, 2]], self.dungeon_level),
             }
 
         item_chances = {
@@ -246,6 +250,7 @@ class GameMap:
 
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
                 monster_choice = random_choice_from_dict(monster_chances)
+
                 if monster_choice == "hound":
                     ai_component = BasicMonster()
                     fighter_component = Fighter(character_sheet=CharacterSheet(6, 6, 6, 6, 6, 6), xp = 30)
@@ -264,7 +269,21 @@ class GameMap:
 
                 entities.append(monster) #Add the monster to our list of entities
                 self.unique_id += 1 #Give every monster a unique id. Might come in clutch later.
-                    
+
+        x = randint(room.x1 + 1, room.x2 - 1)
+        y = randint(room.y1 + 1, room.y2 - 1)
+
+        if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
+            npc_choice = random_choice_from_dict(npc_chances)
+
+            if npc_choice == "party_member":
+                ai_component = PartyMember(player)
+                fighter_component = Fighter(character_sheet=CharacterSheet(14, 14, 14, 14, 14, 14))
+                party_member = Entity(x, y, '@', libtcod.dark_red, name_from_parts(name_part_list), blocks=False,
+                    render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+
+            entities.append(party_member)
+    
         for i in range(number_of_items):
             x = randint(room.x1 + 1, room.x2 - 1)
             y = randint(room.y1 + 1, room .y2 - 1)
