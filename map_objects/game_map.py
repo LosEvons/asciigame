@@ -81,11 +81,14 @@ class GameMap:
                 buildings.append(new_building)
                 num_buildings += 1
         
+        #Attempt at fixing rooms not having doors
+        shared_tiles = []
         for building in buildings:
             for othr_bldn in buildings:
-                if building.intersect(othr_bldn):
-                    shared_tiles = building.get_shared_tiles(othr_bldn)
-                    print(shared_tiles)
+                if building != othr_bldn and building.intersect(othr_bldn):
+                    shared_tiles.append(building.get_shared_tiles(othr_bldn))
+        
+        print(shared_tiles)
             
         stairs_component = Stairs(self.dungeon_level +1)
         down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, 

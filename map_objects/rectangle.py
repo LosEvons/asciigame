@@ -33,9 +33,14 @@ class Rect:
         return top, bottom, left, right
 
     def get_shared_tiles(self, other):
-        shared_tiles = [tile for edge_tile in ]
+        shared_tiles = []
 
-        shared_tiles = [(x, y) for x in range(self.x1, self.x2) if x == (other_x for other_x in range(other.x1, other.x2)) 
-            for y in range(self.y1, self.y2+1) if y == (other_y for other_y in range(other.y1, other.y2))]
-        
+        own_tiles = self.edge
+        other_tiles = other.edge
+
+        for side in own_tiles:
+            for tile in side:
+                if tile in (tile2 for side2 in other_tiles for tile2 in side2):
+                    shared_tiles.append(tile)
+                
         return shared_tiles
