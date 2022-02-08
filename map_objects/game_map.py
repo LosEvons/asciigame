@@ -54,12 +54,13 @@ class GameMap:
             for y in range(map_height-2):
                 self.tiles[x+1][y+1].blocked = False
                 self.tiles[x+1][y+1].block_sight = False
+                self.tiles[x+1][y+1].grass = True
 
         for b in range(max_buildings):
             w = randint(building_min_size, building_max_size)
             h = randint(building_min_size, building_max_size)
-            x = randint(0, map_width - w - 1)
-            y = randint(0, map_height - h - 1)
+            x = randint(0, map_width - w - 2)
+            y = randint(0, map_height - h - 2)
 
             new_building = Rect(x, y, w, h)
 
@@ -170,27 +171,26 @@ class GameMap:
                 self.tiles[x][y].block_sight = False
     
     def create_building(self, building):
-        for x in range(building.x1, building.x2 + 1):
-            self.tiles[x][building.y1].blocked = True
-            self.tiles[x][building.y1].block_sight = True
-            self.tiles[x][building.y2].blocked = True
-            self.tiles[x][building.y2].block_sight = True
-        for y in range(building.y1, building.y2 + 1):
-            self.tiles[building.x1][y].blocked = True
-            self.tiles[building.x1][y].block_sight = True
-            self.tiles[building.x2][y].blocked = True
-            self.tiles[building.x2][y].block_sight = True
+        for edge in building.edge:
+            for tile in edge:
+                if self.tiles[tile[0]][tile[1]].door:
+                    continue
+                self.tiles[tile[0]][tile[1]].blocked = True
+                self.tiles[tile[0]][tile[1]].block_sight = True
 
-        for x in range(building.x1 + 2, building.x2 - 1):
-            for y in range(building.y1 + 2, building.y2 - 1):
+        for x in range(building.x1 + 1, building.x2 - 1):
+            for y in range(building.y1 + 1, building.y2 - 1):
                 self.tiles[x][y].blocked = False
                 self.tiles[x][y].block_sight = False
+                self.tiles[x][y].floor = True
+                self.tiles[x][y].grass = False
 
         while True:
             door = choice(choice(building.edge))
             if door not in (building.tl_corner, building.tr_corner, building.bl_corner, building.br_corner):
                 self.tiles[door[0]][door[1]].blocked = False
                 self.tiles[door[0]][door[1]].block_sight = False
+                self.tiles[door[0]][door[1]].door = True
                 break
 
     def create_h_tunnel(self, x1, x2, y): #Changes the tile type in a x1*x2+1 space. This is used to make small restricted hallways.

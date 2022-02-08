@@ -67,21 +67,43 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
                 visible = fov_map.fov[y][x]     #Makes an array of all the stuff inside our FOV
+
                 wall = game_map.tiles[x][y].block_sight and game_map.tiles[x][y].blocked #defines a wall
+                door = game_map.tiles[x][y].door
+                grass = game_map.tiles[x][y].grass
+                floor = game_map.tiles[x][y].floor
+
+                debug = game_map.tiles[x][y].debug
+                debug2 = game_map.tiles[x][y].debug2
+                if debug:
+                    libtcod.console_set_char_background(con, x, y, libtcod.light_red, libtcod.BKGND_SET)
+                if debug2:
+                    libtcod.console_set_char_background(con, x, y, libtcod.light_green, libtcod.BKGND_SET)
                 if visible:             #If it's visible (in the fov), draw it
                     if wall:
                         libtcod.console_set_default_foreground(con, colors.get('light_wall'))
                         libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
+                    elif door:
+                        libtcod.console_set_default_foreground(con, colors.get('light_wall'))
+                        libtcod.console_put_char(con, x, y, '+', libtcod.BKGND_NONE)
+                    elif grass:
+                        libtcod.console_set_default_foreground(con, libtcod.dark_green)
+                        libtcod.console_put_char(con, x, y, '"', libtcod.BKGND_NONE)
+                    elif floor:
+                        libtcod.console_set_default_foreground(con, colors.get('light_ground'))
+                        libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
                     else:
                         libtcod.console_set_default_foreground(con, colors.get('light_ground'))
                         libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
                     game_map.tiles[x][y].explored = True
                 elif game_map.tiles[x][y].explored: # If it has been seen previously, draw it but darker.
-                
                     if wall:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET) <-- Solid background
                         libtcod.console_set_default_foreground(con, colors.get('dark_wall'))
                         libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
+                    elif door:
+                        libtcod.console_set_default_foreground(con, colors.get('dark_wall'))    
+                        libtcod.console_put_char(con, x, y, '+', libtcod.BKGND_NONE)
                     else:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET) <-- Solid background
                         libtcod.console_set_default_foreground(con, colors.get('dark_ground'))

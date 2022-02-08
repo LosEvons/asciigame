@@ -71,7 +71,7 @@ def get_constants():
     max_room = 35
 
     building_max_size = 12
-    building_min_size = 5
+    building_min_size = 6
     max_buildings = 10
 
     fov_algorithm = 0
