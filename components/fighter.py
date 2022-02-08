@@ -24,7 +24,7 @@ class Fighter:
 
     @property
     def damage_dice(self):
-        if self.owner and self.owner.equipment:
+        if self.owner and self.owner.equipment and self.owner.equipment.damage_dice:
             amount, sides = self.owner.equipment.damage_dice
             damage_roll = sum(roll(amount, sides)) + self.owner.equipment.damage_bonus
         else:

@@ -1,5 +1,6 @@
 import shelve
 import os
+import json
 
 SAVE_GAME = "savegame"
 
@@ -13,6 +14,7 @@ def save_game(player, entities, game_map, message_log, game_state, name_list, cu
         data_file["game_state"] = game_state
         data_file["name_list"] = name_list
         data_file["name_part_list"] = name_part_list
+        
 
 def load_game():
     if not os.path.isfile(SAVE_GAME + ".dat"):
@@ -27,6 +29,8 @@ def load_game():
         game_state = data_file["game_state"]
         name_list = data_file["name_list"]
         name_part_list = data_file["name_part_list"]
+
+
     
     player = entities[player_index]
     cursor = entities[cursor_index]

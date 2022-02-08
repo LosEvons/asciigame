@@ -38,8 +38,10 @@ def get_game_variables(constants):
     name_part_list = constants["name_part_list"]
 
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
-    game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
-        constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor) #Generate the map
+    game_map.make_surface_map(constants["max_buildings"], constants["building_min_size"], constants["building_max_size"],
+        constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor)
+    #game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
+     #   constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor) #Generate the map
 
     message_log = MessageLog(constants["message_x"], constants["message_width"], constants["message_height"])
 
@@ -66,7 +68,11 @@ def get_constants():
 
     room_max_size = 12
     room_min_size = 4
-    max_room = 40
+    max_room = 35
+
+    building_max_size = 12
+    building_min_size = 6
+    max_buildings = 10
 
     fov_algorithm = 0
     fov_light_walls = True
@@ -106,7 +112,10 @@ def get_constants():
         "colors":colors,                                #A list of useful colors
         "name_list":name_list,                          #A list used for dynamic allocation of names to entities
         "special_char_list":special_char_list,
-        "name_part_list":name_part_list
+        "name_part_list":name_part_list,
+        "building_max_size":building_max_size,
+        "building_min_size":building_min_size,
+        "max_buildings":max_buildings
     }
 
     return constants

@@ -6,6 +6,7 @@ def message_box(con, header, width, screen_width, screen_height):
 def message_archive_box(con, message_archive, screen_width, screen_height):
     window = libtcod.console_new(screen_width, screen_height)
     y = screen_height -2
+    message_archive = list(reversed(message_archive))
     for message in message_archive:
         if y == 0:
             break
@@ -44,10 +45,10 @@ def menu(con, header, options, width, screen_width, screen_height):
 
 
     libtcod.console_set_default_foreground(window, libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 1, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
 
-    y = header_height
     letter_index = ord('a')
+    y = header_height
     for option_text in options:
         text = "(" + chr(letter_index) + ") " + option_text
         libtcod.console_print_ex(window, 1, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
@@ -63,19 +64,29 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
         options = ["Inventory is empty."]
     else:
         options = []
+        handled_items = []
+
         for item in player.inventory.items:
-            if player.equipment.main_hand == item:
-                options.append("{} {}d{}+{} (on main hand)".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
-            elif player.equipment.off_hand == item:
-                options.append("{} {} (on off hand)".format(item.name, item.equippable.ac_bonus))
-            elif item not in options and item.equippable:
-                if item.equippable.ac_bonus:
-                    options.append("{} {}".format(item.name, item.equippable.ac_bonus))
-                elif item.equippable.damage_dice:
+            for key, value in player.equipment.bodyparts.items():
+                if value == item:
+                    if item.equippable.damage_dice:
+                        handled_items.append(item)
+                        options.append("{} {}d{}+{} (in {})".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus, key))
+                    elif item.equippable.ac_bonus or item.equippable.max_hp_bonus:
+                        handled_items.append(item)
+                        options.append("{} +{}AC&+{}HP (in {})".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus, key))
+
+            if item not in handled_items and item.equippable:
+                if item.equippable.damage_dice:
+                    handled_items.append(item)
                     options.append("{} {}d{}+{}".format(item.name, item.equippable.damage_dice[0], item.equippable.damage_dice[1], item.equippable.damage_bonus))
-            else:
+                elif item.equippable.ac_bonus or item.equippable.max_hp_bonus:
+                    handled_items.append(item)
+                    options.append("{} +{}AC&+{}HP".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
+            
+            elif item not in handled_items:
+                handled_items.append(item)
                 options.append(item.name)
-        #options = [item.name for item in inventory.items]
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
@@ -144,4 +155,74 @@ def fighter_info_screen(entity, char_screen_width, char_screen_height,
         y = screen_height - char_screen_height
 
     libtcod.console_blit(window, 0, 0, char_screen_width, char_screen_height,
+        0, x, y, 1.0, 0.7)
+
+def equipment_info_screen(player, eqp_screen_width, eqp_screen_height, 
+    screen_width, screen_height, draw_entity_screen, draw_character_screen, other_panel_height):
+
+    window = libtcod.console_new(eqp_screen_width, eqp_screen_height)
+
+    if draw_entity_screen and draw_character_screen:
+        x = screen_width - eqp_screen_width
+        y = 0
+        eqp_screen_height -= other_panel_height * 2
+    elif draw_entity_screen or draw_character_screen:
+        x = screen_width - eqp_screen_width
+        y = 0
+        eqp_screen_height -= other_panel_height
+    else:
+        x = screen_width - eqp_screen_width
+        y = 0
+    
+    window.draw_frame(0, 0, eqp_screen_width, eqp_screen_height)
+
+    rows = 0
+    for key, value in player.equipment.bodyparts.items():
+        if value:
+            if value.equippable and value.equippable.damage_dice:
+                libtcod.console_print_rect_ex(window, 1, rows+1, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "{}: '{}'".format(key.capitalize(), value.name))
+                libtcod.console_print_rect_ex(window, 2, rows+2, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "-{}d{}+{}".format(value.equippable.damage_dice[0], value.equippable.damage_dice[1], 
+                    value.equippable.damage_bonus))
+            else:
+                libtcod.console_print_rect_ex(window, 1, rows+1, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "{}: '{}'".format(key.capitalize(), value.name))
+                libtcod.console_print_rect_ex(window, 2, rows+2, eqp_screen_width, eqp_screen_height,
+                    libtcod.BKGND_NONE, libtcod.LEFT, "+{}AC&+{}HP".format(value.equippable.ac_bonus, value.equippable.max_hp_bonus))
+            
+            rows += 3
+
+        libtcod.console_blit(window, 0, 0, eqp_screen_width, eqp_screen_height,
+        0, x, y, 1.0, 0.7)
+
+def stat_info_screen(player, stat_screen_width, stat_screen_height, 
+    screen_width, screen_height, draw_entity_screen, draw_character_screen, draw_eqp_screen, other_panel_height):
+
+    window = libtcod.console_new(stat_screen_width, stat_screen_height)
+    if draw_eqp_screen:
+        x = screen_width - stat_screen_width * 2
+        y = 0
+        stat_screen_height -= other_panel_height
+    elif draw_entity_screen and draw_character_screen:
+        x = screen_width - stat_screen_width
+        y = 0
+        stat_screen_height -= other_panel_height * 2
+    elif draw_entity_screen or draw_character_screen:
+        x = screen_width - stat_screen_width
+        y = 0
+        stat_screen_height -= other_panel_height
+    else:
+        x = screen_width - stat_screen_width
+        y = 0
+    
+    window.draw_frame(0, 0, stat_screen_width, stat_screen_height)
+
+    rows = 0
+    for key, value in player.fighter.character_sheet.ability_scores.items():
+        libtcod.console_print_rect_ex(window, 1, rows+1, stat_screen_width, stat_screen_height,
+            libtcod.BKGND_NONE, libtcod.LEFT, "{} = {}".format(key.capitalize(), value))
+        rows += 1
+
+        libtcod.console_blit(window, 0, 0, stat_screen_width, stat_screen_height,
         0, x, y, 1.0, 0.7)

@@ -8,7 +8,7 @@ class CharacterSheet:
         self.intelligence = intelligence
         self.wisdom = wisdom
         self.charisma = charisma
-        self.ability_scores = {"str":strenght, "con":constitution, "dex":dexterity, "int":intelligence, "wis":wisdom, "cha":charisma}
+        self.ability_scores = {"str":self.strenght, "con":self.constitution, "dex":self.dexterity, "int":self.intelligence, "wis":self.wisdom, "cha":self.charisma}
 
     @property
     def ability_modifiers(self):

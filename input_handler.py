@@ -194,6 +194,12 @@ def handle_player_turn_keys(key):
     elif key_char == 'v':
         return{"show_entity_screen":True}
 
+    elif key_char == 'e':
+        return{"show_eqp_screen":True}
+
+    elif key_char == 't':
+        return{"show_stat_screen":True}
+
     elif key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle fullscreen
         return {"fullscreen": True}
