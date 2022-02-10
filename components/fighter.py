@@ -1,4 +1,5 @@
 import tcod as libtcod
+from components.ai import PartyMember
 from game_messages import Message
 from random_utils import roll
 
@@ -81,4 +82,14 @@ class Fighter:
             results.append({"message":Message("{} missed with {}.".format(
                 self.owner.name, attack_roll))})
         
+        return results
+    
+    def talk_with(self, target):
+        results = []
+        ai_component = PartyMember(self.owner)
+
+        target.ai = ai_component
+        target.ai.owner = target
+        results.append({"message":Message("You convince {} to join you".format(target.name))})
+
         return results

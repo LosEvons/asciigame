@@ -60,3 +60,7 @@ class PartyMember:
             self.parent_current_coordinates = (player.x, player.y)
         
         return results
+
+class PassiveNPC:
+    def take_turn(self, player, fov_map, game_map, entities):
+        return []

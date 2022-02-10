@@ -10,7 +10,7 @@ class Entity:
     def __init__(self, x, y, char, color, name, blocks=False,
         render_order=RenderOrder.CORPSE, fighter=None, ai=None,
         item=None, inventory=None, stairs=None, level=None,
-        equipment=None, equippable=None): #Entities do not block or have any ai-script by default
+        equipment=None, equippable=None, friendly=False): #Entities do not block or have any ai-script by default
         
         self.x = x
         self.y = y
@@ -27,6 +27,7 @@ class Entity:
         self.level = level
         self.equipment = equipment
         self.equippable = equippable
+        self.friendly = friendly
 
         if self.fighter:
             self.fighter.owner = self

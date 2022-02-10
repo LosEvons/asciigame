@@ -1,7 +1,7 @@
 from components.character_sheet import CharacterSheet
 from components.equipment import Equipment
 from components.equippable import Equippable
-from components.ai import BasicMonster, PartyMember
+from components.ai import BasicMonster, PartyMember, PassiveNPC
 from components.fighter import Fighter
 from equipment_slots import EquipmentSlots
 from game_messages import Message
@@ -277,12 +277,12 @@ class GameMap:
             npc_choice = random_choice_from_dict(npc_chances)
 
             if npc_choice == "party_member":
-                ai_component = PartyMember(player)
+                ai_component = PassiveNPC()
                 fighter_component = Fighter(character_sheet=CharacterSheet(14, 14, 14, 14, 14, 14))
-                party_member = Entity(x, y, '@', libtcod.dark_red, name_from_parts(name_part_list), blocks=False,
-                    render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
+                party_member = Entity(x, y, 'Q', libtcod.dark_red, name_from_parts(name_part_list), blocks=True,
+                    render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component, friendly=True)
 
-            entities.append(party_member)
+                entities.append(party_member)
     
         for i in range(number_of_items):
             x = randint(room.x1 + 1, room.x2 - 1)
