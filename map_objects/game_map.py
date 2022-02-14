@@ -222,7 +222,8 @@ class GameMap:
             }
         
         npc_chances = {
-            "party_member":from_dungeon_level([[100, 1], [0, 2]], self.dungeon_level),
+            "party_member":from_dungeon_level([[10, 1], [5, 2]], self.dungeon_level),
+            "party_member":from_dungeon_level([[10, 1], [5, 2]], self.dungeon_level)
             }
 
         item_chances = {
