@@ -46,7 +46,7 @@ class PartyMember:
         self.parent_previous_coordinates = None
         self.parent_current_coordinates = (player.x, player.y)
 
-    def take_turn(self, player, fov_map, game_map, entities):
+    def take_turn(self, player, fov_map, game_map, entities):        
         results = []
         party_member = self.owner
 

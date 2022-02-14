@@ -195,8 +195,11 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
                 target = player.get_blocking_entities_at_location(entities, destination_x, destination_y)
                 if target:
                     if target.friendly:
-                        talk_results = player.fighter.talk_with(target)
-                        player_turn_results.extend(talk_results)
+                        if target not in player.followers:
+                            talk_results = player.fighter.talk_with(target)
+                            player_turn_results.extend(talk_results)
+                        else:
+                            player.move(dx, dy)
                     else:
                         attack_results = player.fighter.attack(target)
                         player_turn_results.extend(attack_results)

@@ -245,8 +245,8 @@ class GameMap:
             }
 
         for i in range(number_of_monsters): #Iterate through all the monsters
-            x = randint(room.x1 + 1, room.x2 - 1)
-            y = randint(room.y1 + 1, room.y2 - 1)
+            x = randint(room.x1 + 1, room.x2 - 2)
+            y = randint(room.y1 + 1, room.y2 - 2)
 
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
                 monster_choice = random_choice_from_dict(monster_chances)
@@ -270,8 +270,8 @@ class GameMap:
                 entities.append(monster) #Add the monster to our list of entities
                 self.unique_id += 1 #Give every monster a unique id. Might come in clutch later.
 
-        x = randint(room.x1 + 1, room.x2 - 1)
-        y = randint(room.y1 + 1, room.y2 - 1)
+        x = randint(room.x1 + 1, room.x2 - 2)
+        y = randint(room.y1 + 1, room.y2 - 2)
 
         if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
             npc_choice = random_choice_from_dict(npc_chances)
@@ -285,8 +285,8 @@ class GameMap:
                 entities.append(party_member)
     
         for i in range(number_of_items):
-            x = randint(room.x1 + 1, room.x2 - 1)
-            y = randint(room.y1 + 1, room .y2 - 1)
+            x = randint(room.x1 + 1, room.x2 - 2)
+            y = randint(room.y1 + 1, room .y2 - 2)
 
             if not any ([entity for entity in entities if entity.x == x and entity.y == y]):
                 item_choice = random_choice_from_dict(item_chances)

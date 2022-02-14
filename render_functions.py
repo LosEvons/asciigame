@@ -43,7 +43,7 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
     libtcod.console_set_default_background(other_bars, libtcod.black)
     count = 1
     for entity in entities:
-        if entity.render_order != RenderOrder.INVISIBLE and entity.fighter and not entity.name == "Player":
+        if entity.render_order != RenderOrder.INVISIBLE and entity.fighter and not entity.name == "Player" and not entity.friendly:
             if fov_map.fov[entity.y][entity.x]:
                 libtcod.console_set_default_foreground(other_bars, libtcod.grey)
                 libtcod.console_print_ex(other_bars, 1, count, libtcod.BKGND_NONE,

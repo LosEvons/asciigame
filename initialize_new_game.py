@@ -25,7 +25,7 @@ def get_game_variables(constants):
     
     player = Entity(0, 0, "@", libtcod.red, "Player", blocks=True, render_order=RenderOrder.ACTOR, 
         fighter=fighter_component, inventory=inventory_component, level=level_component,
-        equipment=equipment_component) #Initializing the player
+        equipment=equipment_component, followers=[]) #Initializing the player
     cursor = Entity(50, 50, 'X', libtcod.light_red, "Cursor", render_order=RenderOrder.INVISIBLE)
     entities = [player, cursor] #List of all the entities
     

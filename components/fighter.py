@@ -90,6 +90,10 @@ class Fighter:
 
         target.ai = ai_component
         target.ai.owner = target
-        results.append({"message":Message("You convince {} to join you".format(target.name))})
+        if target not in self.owner.followers:
+            self.owner.followers.append(target)
+            results.append({"message":Message("You convince {} to join you".format(target.name))})
+        else:
+            results.append({"message":Message("{} is still following you.".format(target.name))})
 
         return results
