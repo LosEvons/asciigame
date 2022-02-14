@@ -30,7 +30,6 @@ class GameMap:
 
     def initialize_tiles(self): #Creates a coordinate system of every tile. By default blocking and vision blocking is set to True.
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
-
         return tiles
 
     def get_adjacent_tiles(self, x, y):
@@ -41,6 +40,23 @@ class GameMap:
             "right":self.tiles[x+1][y]
         }
         return adjacent_tiles
+
+    def center_map(self, player, entities):
+        map_center_x = self.width // 2
+        map_center_y = self.height // 2
+
+        dx = int(map_center_x - player.x)
+        dy = int(map_center_y - player.y)
+
+        for entity in entities:
+            entity.x += dx
+            entity.y += dy
+        
+        for x in range(self.width):
+            for y in range(self.height):
+                self.tiles[x][y] = None
+                self.tiles[x][y] = self.tiles[x+dx][y+dy]
+
     
     def make_surface_map(self, max_buildings, building_min_size, building_max_size, map_width, map_height,
         player, entities, name_list, name_part_list, cursor):
@@ -370,3 +386,4 @@ class GameMap:
                 
 
                 entities.append(item)
+            

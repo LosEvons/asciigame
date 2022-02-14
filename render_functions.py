@@ -22,6 +22,17 @@ def get_names_under_mouse(mouse, entities, fov_map, cursor,): #Displays the name
 
     return names.capitalize()
 
+def render_sidebar(sidebar):
+    sidebar.draw_frame(0, 0, sidebar.width, sidebar.height, fg=libtcod.white)
+    y = 1
+    for i in range(6):
+        libtcod.console_set_default_background(sidebar, libtcod.gold)
+        libtcod.console_rect(sidebar, 1, y, sidebar.width - 2, 8, False, libtcod.BKGND_SCREEN)
+        y += 9
+
+    libtcod.console_set_default_background(sidebar, libtcod.green)
+    libtcod.console_rect(sidebar, 1, sidebar.height - 9, sidebar.width - 2, 8, False, libtcod.BKGND_SCREEN)
+
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, game_map): #Render the HP bar
     panel.draw_frame(0, 0, panel.width, panel.height, fg=libtcod.white)
     panel.print_box(panel.width//2, 0, 34, 1, " Dungeon Level {} ".format(game_map.dungeon_level))
@@ -60,9 +71,9 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
                 count += 1
     
 
-def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
-    screen_height, bar_width, panel_height, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
-    draw_entity_screen, draw_eqp_screen, draw_stat_screen):
+def render_all(con, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
+    screen_height, bar_width, panel_height, panel_x, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
+    draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height):
     if fov_recompute:
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
@@ -121,6 +132,8 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
     libtcod.console_set_default_background(panel, libtcod.black)#Sets the UI background as black
     libtcod.console_clear(panel) #Clears UI before drawing it again
 
+    render_sidebar(sidebar)
+
     render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_grey, game_map) #Draws the hp bar
 
@@ -137,8 +150,9 @@ def render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_
         y += 1
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0) #Blit draws stuff onto a hypothetical console. Flushing updates to the newer console.
-    libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y) #Draws our UI element into the console
-    libtcod.console_blit(other_bars, 0, 0, 30, 30, 0, 0, 0)
+    libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, panel_x, panel_y) #Draws our UI element into the console
+    libtcod.console_blit(other_bars, 0, 0, 30, 30, 0, 15, 0)
+    libtcod.console_blit(sidebar, 0, 0, sidebar_width, sidebar_height, 0, 0, 0)
 
     inventory_title = None
     if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):

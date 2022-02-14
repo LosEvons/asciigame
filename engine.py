@@ -33,8 +33,9 @@ def main():
         constants["screen_height"], "libtcode game", False) # Configuring the game window/console
 
     con = libtcod.console_new(constants["screen_width"], constants["screen_height"]) #Initializing the game window/console
-    panel = libtcod.console_new(constants["screen_width"]-30, constants["panel_height"]) #We initialize the UI panel
+    panel = libtcod.console_new(constants["panel_width"]-30, constants["panel_height"]) #We initialize the UI panel
     other_bars = libtcod.console_new(12, 6)
+    sidebar = libtcod.console_new(constants["sidebar_width"], constants["sidebar_height"])
 
     player = None
     cursor = None
@@ -87,11 +88,11 @@ def main():
         else:
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, panel, other_bars, constants, name_list, cursor, name_part_list)
+                con, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, other_bars, constants, name_list, cursor, name_part_list):
+def play_game(player, entities, game_map, message_log, game_state, con, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -111,9 +112,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
             recompute_fov(fov_map, player.x, player.y, constants["fov_radius"], constants["fov_light_walls"], constants["fov_algorithm"])
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
-        render_all(con, panel, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
-            constants["bar_width"], constants["panel_height"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
-            draw_entity_screen, draw_eqp_screen, draw_stat_screen)
+        render_all(con, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
+            constants["bar_width"], constants["panel_height"], constants["panel_x"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
+            draw_entity_screen, draw_eqp_screen, draw_stat_screen, constants["sidebar_width"], constants["sidebar_height"])
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(con, entities)
@@ -142,6 +143,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
         message_archive = action.get("message_archive")
         show_eqp_screen = action.get("show_eqp_screen")
         show_stat_screen = action.get("show_stat_screen")
+        center_map = action.get("center_map")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -310,6 +312,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
 
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+        
+        if center_map:
+            game_map.center_map(player, entities)
 
         if exit:
             if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.MESSAGE_ARCHIVE):
@@ -318,8 +323,6 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, o
                 player_turn_results.append({"targeting_canceled":True})
             else:
                 save_game(player, entities, game_map, message_log, game_state, name_list, cursor, name_part_list)
-
-
                 return True
         #After this the code handles the execution of things that happened on the player's turn.
 

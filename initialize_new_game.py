@@ -55,9 +55,14 @@ def get_constants():
     screen_width = 128
     screen_height = 72
 
+    sidebar_width = 10
+    sidebar_height = screen_height
+
     bar_width = 22
     panel_height = 16
+    panel_width = screen_width - sidebar_width
     panel_y = screen_height - panel_height
+    panel_x = screen_width - panel_width
 
     message_x = bar_width + 2
     message_width = screen_width - bar_width - 2
@@ -95,9 +100,13 @@ def get_constants():
         "window_title":window_title,                    #Game window title
         "screen_width":screen_width,                    #Size of screen
         "screen_height":screen_height,                  #
+        "sidebar_width":sidebar_width,
+        "sidebar_height":sidebar_height,
         "bar_width":bar_width,                          #Health bar size
         "panel_height":panel_height,                    #Size of the UI panel (height and location)
-        "panel_y":panel_y,                              #
+        "panel_width":panel_width,
+        "panel_y":panel_y,                              
+        "panel_x":panel_x,
         "message_x":message_x,                          #Location of the message feed
         "message_width":message_width,                  #Size of the message feed
         "message_height":message_height,                #
