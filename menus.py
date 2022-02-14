@@ -11,7 +11,7 @@ def message_archive_box(con, message_archive, screen_width, screen_height):
         if y == 0:
             break
 
-        libtcod.console_print_ex(window, 1, y, libtcod.BKGND_ALPHA(100), libtcod.LEFT, message.text)
+        libtcod.console_print_ex(window, 1, y, libtcod.BKGND_ALPHA(150), libtcod.LEFT, message.text)
         y -= 1
     
     libtcod.console_blit(window, 0, 0, screen_width, screen_height, 0, 0, 0, 1.0, 0.7)        

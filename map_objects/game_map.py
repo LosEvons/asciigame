@@ -30,7 +30,6 @@ class GameMap:
 
     def initialize_tiles(self): #Creates a coordinate system of every tile. By default blocking and vision blocking is set to True.
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
-
         return tiles
 
     def get_adjacent_tiles(self, x, y):
@@ -189,7 +188,7 @@ class GameMap:
             door = choice(choice(building.edge))
             if door not in (building.tl_corner, building.tr_corner, building.bl_corner, building.br_corner):
                 self.tiles[door[0]][door[1]].blocked = False
-                self.tiles[door[0]][door[1]].block_sight = False
+                self.tiles[door[0]][door[1]].block_sight = True
                 self.tiles[door[0]][door[1]].door = True
                 break
 
