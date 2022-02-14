@@ -33,12 +33,26 @@ class GameMap:
         return tiles
 
     def get_adjacent_tiles(self, x, y):
-        adjacent_tiles = {
-            "up":self.tiles[x][y-1],
-            "down":self.tiles[x][y+1],
-            "left":self.tiles[x-1][y],
-            "right":self.tiles[x+1][y]
-        }
+        adjacent_tiles = {}
+        
+        if x+1 in range(self.width):
+            adjacent_tiles["right"] = self.tiles[x+1][y]
+            if y-1 in range(self.height):
+                adjacent_tiles["top_right"] = self.tiles[x+1][y-1]
+            if y+1 in range(self.height):
+                adjacent_tiles["bottom_right"] = self.tiles[x+1][y+1]
+        if y-1 in range(self.height):
+            adjacent_tiles["up"] = self.tiles[x][y-1]
+        if y+1 in range(self.height):
+            adjacent_tiles["down"] = self.tiles[x][y+1]
+        if x-1 in range(self.width):
+            adjacent_tiles["left"] = self.tiles[x-1][y]
+            if y-1 in range(self.height):
+                adjacent_tiles["top_left"] = self.tiles[x-1][y-1]
+            if y+1 in range(self.height):
+                adjacent_tiles["bottom_left"] = self.tiles[x-1][y+1]
+        
+
         return adjacent_tiles
     
     def make_surface_map(self, max_buildings, building_min_size, building_max_size, map_width, map_height,
@@ -111,7 +125,7 @@ class GameMap:
             h = randint(room_min_size, room_max_size)
             # random position without going out of the boundaries of the map
             x = randint(0, map_width - w)
-            y = randint(0, map_height - h )
+            y = randint(0, map_height - h)
 
             new_room = Rect(x, y, w, h) #We make a new room template.
 
@@ -369,3 +383,24 @@ class GameMap:
                 
 
                 entities.append(item)
+
+    def make_cavern_map(self, map_width, map_height, 
+        player, entities, name_list, name_part_list, cursor):
+
+        noise = libtcod.noise.Noise(
+            dimensions=2,
+            algorithm=libtcod.noise.Algorithm.SIMPLEX,
+            implementation=1,
+            lacunarity=0.5
+        )
+
+        samples = noise[libtcod.noise.grid(shape=(self.width, self.height), scale=0.25, origin=(0, 0))]
+
+        for x in range(self.width):
+            for y in range(self.height):
+                sample = noise.get_point(x=x, y=y)
+                if sample > 0.5:
+                    self.tiles[x][y].blocked = False
+                    self.tiles[x][y].block_sight = False
+                    self.tiles[x][y].debug = True
+

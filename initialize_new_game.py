@@ -40,8 +40,6 @@ def get_game_variables(constants):
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
     game_map.make_surface_map(constants["max_buildings"], constants["building_min_size"], constants["building_max_size"],
         constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor)
-    #game_map.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"], 
-     #   constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor) #Generate the map
 
     message_log = MessageLog(constants["message_x"], constants["message_width"], constants["message_height"])
 
