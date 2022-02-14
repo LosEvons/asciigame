@@ -188,7 +188,7 @@ class GameMap:
             door = choice(choice(building.edge))
             if door not in (building.tl_corner, building.tr_corner, building.bl_corner, building.br_corner):
                 self.tiles[door[0]][door[1]].blocked = False
-                self.tiles[door[0]][door[1]].block_sight = False
+                self.tiles[door[0]][door[1]].block_sight = True
                 self.tiles[door[0]][door[1]].door = True
                 break
 
@@ -369,4 +369,12 @@ class GameMap:
                 
 
                 entities.append(item)
-            
+
+    def make_cavern_map(self, map_width, map_height, entities, player, name_list, name_part_list, cursor):
+        noise = libtcod.noise.Noise(
+            dimensions=2,
+            algorithm=libtcod.noise.Algorithm.SIMPLEX,
+            seed=42
+        )
+        samples = noise[libtcod.noise.grid(shape=(5, 5), scale=0.25, origin=(0, 0))]
+        print(samples)

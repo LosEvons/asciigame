@@ -69,7 +69,7 @@ def get_constants():
     message_height = panel_height - 2
     
     map_width = screen_width
-    map_height = screen_height - panel_height
+    map_height = screen_height
 
     room_max_size = 12
     room_min_size = 4

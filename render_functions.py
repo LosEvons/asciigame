@@ -71,9 +71,9 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
                 count += 1
     
 
-def render_all(con, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
+def render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
     screen_height, bar_width, panel_height, panel_x, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
-    draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height):
+    draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height, map_x_anchor, map_y_anchor):
     if fov_recompute:
         for y in range(game_map.height):        # Draw all the tiles in the game map
             for x in range(game_map.width):
@@ -87,48 +87,48 @@ def render_all(con, panel, sidebar, other_bars, entities, player, game_map, fov_
                 debug = game_map.tiles[x][y].debug
                 debug2 = game_map.tiles[x][y].debug2
                 if debug:
-                    libtcod.console_set_char_background(con, x, y, libtcod.light_red, libtcod.BKGND_SET)
+                    libtcod.console_set_char_background(map_console, x, y, libtcod.light_red, libtcod.BKGND_SET)
                 if debug2:
-                    libtcod.console_set_char_background(con, x, y, libtcod.light_green, libtcod.BKGND_SET)
+                    libtcod.console_set_char_background(map_console, x, y, libtcod.light_green, libtcod.BKGND_SET)
                 if visible:             #If it's visible (in the fov), draw it
                     if wall:
-                        libtcod.console_set_default_foreground(con, colors.get('light_wall'))
-                        libtcod.console_set_char_background(con, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                     elif door:
-                        libtcod.console_set_default_foreground(con, colors.get('light_wall'))
-                        libtcod.console_put_char(con, x, y, '+', libtcod.BKGND_NONE)
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_put_char(map_console, x, y, '+', libtcod.BKGND_NONE)
                     elif grass:
-                        libtcod.console_set_default_foreground(con, libtcod.green)
-                        libtcod.console_put_char(con, x, y, '"', libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(con, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(250))
+                        libtcod.console_set_default_foreground(map_console, libtcod.dark_green)
+                        libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(250))
                     elif floor:
-                        libtcod.console_set_default_foreground(con, colors.get('light_ground'))
-                        libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_ground'))
+                        libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
                     else:
-                        libtcod.console_set_default_foreground(con, colors.get('light_ground'))
-                        libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_ground'))
+                        libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
                     game_map.tiles[x][y].explored = True
                 elif game_map.tiles[x][y].explored: # If it has been seen previously, draw it but darker.
                     if wall:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET) <-- Solid background
-                        libtcod.console_set_default_foreground(con, colors.get('dark_wall'))
-                        libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, '#', libtcod.BKGND_NONE)
                     elif door:
-                        libtcod.console_set_default_foreground(con, colors.get('dark_wall'))    
-                        libtcod.console_put_char(con, x, y, '+', libtcod.BKGND_NONE)
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))    
+                        libtcod.console_put_char(map_console, x, y, '+', libtcod.BKGND_NONE)
                     else:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET) <-- Solid background
-                        libtcod.console_set_default_foreground(con, colors.get('dark_ground'))
-                        libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_ground'))
+                        libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
 
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
     
     for entity in entities_in_render_order:         # Draw all entities in the list
         if entity.render_order != RenderOrder.INVISIBLE:
             if fov_map.fov[entity.y][entity.x] or (entity.stairs and game_map.tiles[entity.x][entity.y].explored): #If it's in our fov-range
-                draw_entity(con, entity)
+                draw_entity(map_console, entity)
         if entity.name == "Cursor" and entity.render_order == RenderOrder.ACTOR:
-            draw_entity(con, entity)
+            draw_entity(map_console, entity)
 
     libtcod.console_set_default_background(panel, libtcod.black)#Sets the UI background as black
     libtcod.console_clear(panel) #Clears UI before drawing it again
@@ -151,6 +151,7 @@ def render_all(con, panel, sidebar, other_bars, entities, player, game_map, fov_
         y += 1
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0) #Blit draws stuff onto a hypothetical console. Flushing updates to the newer console.
+    libtcod.console_blit(map_console, 0, 0, game_map.width, game_map.height, 0, map_x_anchor, map_y_anchor)
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, panel_x, panel_y) #Draws our UI element into the console
     libtcod.console_blit(other_bars, 0, 0, 30, 30, 0, 15, 0)
     libtcod.console_blit(sidebar, 0, 0, sidebar_width, sidebar_height, 0, 0, 0)
