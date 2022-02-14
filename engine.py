@@ -143,7 +143,6 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, s
         message_archive = action.get("message_archive")
         show_eqp_screen = action.get("show_eqp_screen")
         show_stat_screen = action.get("show_stat_screen")
-        center_map = action.get("center_map")
         
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
@@ -312,9 +311,6 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, s
 
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-        
-        if center_map:
-            game_map.center_map(player, entities)
 
         if exit:
             if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.MESSAGE_ARCHIVE):

@@ -93,13 +93,14 @@ def render_all(con, panel, sidebar, other_bars, entities, player, game_map, fov_
                 if visible:             #If it's visible (in the fov), draw it
                     if wall:
                         libtcod.console_set_default_foreground(con, colors.get('light_wall'))
-                        libtcod.console_put_char(con, x, y, '#', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(con, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                     elif door:
                         libtcod.console_set_default_foreground(con, colors.get('light_wall'))
                         libtcod.console_put_char(con, x, y, '+', libtcod.BKGND_NONE)
                     elif grass:
-                        libtcod.console_set_default_foreground(con, libtcod.dark_green)
+                        libtcod.console_set_default_foreground(con, libtcod.green)
                         libtcod.console_put_char(con, x, y, '"', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(con, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(250))
                     elif floor:
                         libtcod.console_set_default_foreground(con, colors.get('light_ground'))
                         libtcod.console_put_char(con, x, y, '.', libtcod.BKGND_NONE)

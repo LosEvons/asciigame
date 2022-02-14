@@ -1,6 +1,3 @@
-from sklearn.covariance import graphical_lasso
-
-
 class Tile:
     """
     A tile on a map. Can block movement and sight

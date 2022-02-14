@@ -199,9 +199,6 @@ def handle_player_turn_keys(key):
 
     elif key_char == 't':
         return{"show_stat_screen":True}
-    
-    elif key.vk == libtcod.KEY_ENTER:
-        return {"center_map":True}
 
     elif key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle fullscreen
