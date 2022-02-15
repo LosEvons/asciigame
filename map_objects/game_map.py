@@ -184,12 +184,37 @@ class GameMap:
                 self.tiles[x][y].block_sight = False
     
     def create_building(self, building):
-        for edge in building.edge:
-            for tile in edge:
+        for key, value in building.edge.items():
+            for tile in value:
                 if self.tiles[tile[0]][tile[1]].door:
                     continue
-                self.tiles[tile[0]][tile[1]].blocked = True
-                self.tiles[tile[0]][tile[1]].block_sight = True
+                if tile not in (building.tl_corner, building.tr_corner, building.bl_corner, building.br_corner):
+                    if key in ("top", "bottom"):
+                        self.tiles[tile[0]][tile[1]].blocked = True
+                        self.tiles[tile[0]][tile[1]].block_sight = True
+                        self.tiles[tile[0]][tile[1]].hwall = True
+                    if key in ("left", "right"):
+                        self.tiles[tile[0]][tile[1]].blocked = True
+                        self.tiles[tile[0]][tile[1]].block_sight = True
+                        self.tiles[tile[0]][tile[1]].vwall = True
+                else:
+                    if tile == building.tl_corner:
+                        self.tiles[tile[0]][tile[1]].blocked = True
+                        self.tiles[tile[0]][tile[1]].block_sight = True
+                        self.tiles[tile[0]][tile[1]].tlwall = True
+                    elif tile == building.tr_corner:
+                        self.tiles[tile[0]][tile[1]].blocked = True
+                        self.tiles[tile[0]][tile[1]].block_sight = True
+                        self.tiles[tile[0]][tile[1]].trwall = True
+                    elif tile == building.bl_corner:
+                        self.tiles[tile[0]][tile[1]].blocked = True
+                        self.tiles[tile[0]][tile[1]].block_sight = True
+                        self.tiles[tile[0]][tile[1]].blwall = True
+                    elif tile == building.br_corner:
+                        self.tiles[tile[0]][tile[1]].blocked = True
+                        self.tiles[tile[0]][tile[1]].block_sight = True
+                        self.tiles[tile[0]][tile[1]].brwall = True
+
 
         for x in range(building.x1 + 1, building.x2 - 1):
             for y in range(building.y1 + 1, building.y2 - 1):
@@ -199,11 +224,15 @@ class GameMap:
                 self.tiles[x][y].grass = False
 
         while True:
-            door = choice(choice(building.edge))
+            door = choice(choice(list(building.edge.values())))
+
             if door not in (building.tl_corner, building.tr_corner, building.bl_corner, building.br_corner):
                 self.tiles[door[0]][door[1]].blocked = False
                 self.tiles[door[0]][door[1]].block_sight = True
                 self.tiles[door[0]][door[1]].door = True
+                self.tiles[door[0]][door[1]].wall = False
+                self.tiles[door[0]][door[1]].vwall = False
+                self.tiles[door[0]][door[1]].hwall = False
                 break
 
     def create_h_tunnel(self, x1, x2, y): #Changes the tile type in a x1*x2+1 space. This is used to make small restricted hallways.
@@ -235,17 +264,17 @@ class GameMap:
             }
         
         npc_chances = {
-            "party_member":from_dungeon_level([[10, 1], [5, 2]], self.dungeon_level),
-            "party_member":from_dungeon_level([[10, 1], [5, 2]], self.dungeon_level)
+            "party_member":from_dungeon_level([[1, 1], [5, 2], [3, 3], [1, 4]], self.dungeon_level),
+            "party_member":from_dungeon_level([[1, 1], [5, 2], [3, 3], [1, 4]], self.dungeon_level)
             }
 
         item_chances = {
             "healing_potion":30, 
-            "lightning_scroll":from_dungeon_level([[25, 4]], self.dungeon_level), 
-            "fireball_scroll":from_dungeon_level([[25, 1]], self.dungeon_level), 
-            "confusion_scroll":from_dungeon_level([[25, 1]], self.dungeon_level),
+            "lightning_scroll":from_dungeon_level([[10, 4]], self.dungeon_level), 
+            "fireball_scroll":from_dungeon_level([[10, 3]], self.dungeon_level), 
+            "confusion_scroll":from_dungeon_level([[10, 2]], self.dungeon_level),
             "shield":from_dungeon_level([[60, 1], [10, 2], [0, 3]], self.dungeon_level),
-            "1d6sword":from_dungeon_level([[40, 1], [10, 2], [0, 3]], self.dungeon_level),
+            "1d6sword":from_dungeon_level([[25, 1], [10, 2], [0, 3]], self.dungeon_level),
             "1d8sword":from_dungeon_level([[30, 2], [10, 3], [5 ,4], [0, 5]], self.dungeon_level),
             "2d6sword":from_dungeon_level([[20, 4]], self.dungeon_level),
             "2d8sword":from_dungeon_level([[10, 6]],self.dungeon_level),

@@ -23,14 +23,14 @@ class Rect:
 
     @property
     def edge(self):
-        top = [(x, y) for x in range(self.x1, self.x2) for y in range(self.y1, self.y2) if y == self.y1]
-        bottom = [(x, y) for x in range(self.x1, self.x2) for y in range(self.y1, self.y2) if y == self.y2-1]
-        left = [(x, y) for x in range(self.x1, self.x2) if x == self.x1 for y in range(self.y1, self.y2)]
-        right = [(x, y) for x in range(self.x1, self.x2) if x == self.x2-1 for y in range(self.y1, self.y2)]
-
-
-
-        return top, bottom, left, right
+        edges = {
+            "top":[(x, y) for x in range(self.x1, self.x2) for y in range(self.y1, self.y2) if y == self.y1],
+            "bottom":[(x, y) for x in range(self.x1, self.x2) for y in range(self.y1, self.y2) if y == self.y2-1],
+            "left":[(x, y) for x in range(self.x1, self.x2) if x == self.x1 for y in range(self.y1, self.y2)],
+            "right":[(x, y) for x in range(self.x1, self.x2) if x == self.x2-1 for y in range(self.y1, self.y2)]
+        }
+        
+        return edges
 
     def get_shared_tiles(self, other):
         shared_tiles = []

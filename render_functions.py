@@ -26,11 +26,11 @@ def render_sidebar(sidebar):
     sidebar.draw_frame(0, 0, sidebar.width, sidebar.height, fg=libtcod.white)
     y = 1
     for i in range(6):
-        libtcod.console_set_default_background(sidebar, libtcod.gold)
+        libtcod.console_set_default_background(sidebar, libtcod.gray)
         libtcod.console_rect(sidebar, 1, y, sidebar.width - 2, 8, False, libtcod.BKGND_SCREEN)
         y += 9
 
-    libtcod.console_set_default_background(sidebar, libtcod.green)
+    libtcod.console_set_default_background(sidebar, libtcod.gray)
     libtcod.console_rect(sidebar, 1, sidebar.height - 9, sidebar.width - 2, 8, False, libtcod.BKGND_SCREEN)
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, game_map): #Render the HP bar
@@ -79,7 +79,15 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
             for x in range(game_map.width):
                 visible = fov_map.fov[y][x]     #Makes an array of all the stuff inside our FOV
 
-                wall = game_map.tiles[x][y].block_sight and game_map.tiles[x][y].blocked #defines a wall
+                #wall = game_map.tiles[x][y].block_sight and game_map.tiles[x][y].blocked #defines a wall
+                wall = game_map.tiles[x][y].wall
+                hwall = game_map.tiles[x][y].hwall
+                vwall = game_map.tiles[x][y].vwall
+                brwall = game_map.tiles[x][y].brwall
+                blwall = game_map.tiles[x][y].blwall
+                trwall = game_map.tiles[x][y].trwall
+                tlwall = game_map.tiles[x][y].tlwall
+
                 door = game_map.tiles[x][y].door
                 grass = game_map.tiles[x][y].grass
                 floor = game_map.tiles[x][y].floor
@@ -94,13 +102,38 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                     if wall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
                         libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, '0', libtcod.BKGND_NONE)
+                    elif hwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, 205, libtcod.BKGND_NONE)
+                    elif vwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, 186, libtcod.BKGND_NONE)
+                    elif brwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, 188, libtcod.BKGND_NONE)
+                    elif trwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, 187, libtcod.BKGND_NONE)
+                    elif blwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, 200, libtcod.BKGND_NONE)
+                    elif tlwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        libtcod.console_put_char(map_console, x, y, 201, libtcod.BKGND_NONE)
                     elif door:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
                         libtcod.console_put_char(map_console, x, y, '+', libtcod.BKGND_NONE)
                     elif grass:
                         libtcod.console_set_default_foreground(map_console, libtcod.dark_green)
                         libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(250))
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darker_green, libtcod.BKGND_ALPHA(230))
                     elif floor:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_ground'))
                         libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
@@ -112,10 +145,32 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                     if wall:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET) <-- Solid background
                         libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
-                        libtcod.console_put_char(map_console, x, y, '#', libtcod.BKGND_NONE)
+                        libtcod.console_put_char(map_console, x, y, '0', libtcod.BKGND_NONE)
+                    elif hwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, 205, libtcod.BKGND_NONE)
+                    elif vwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, 186, libtcod.BKGND_NONE)
+                    elif brwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, 188, libtcod.BKGND_NONE)
+                    elif trwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, 187, libtcod.BKGND_NONE)
+                    elif blwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, 200, libtcod.BKGND_NONE)
+                    elif tlwall:
+                        libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))
+                        libtcod.console_put_char(map_console, x, y, 201, libtcod.BKGND_NONE)
                     elif door:
                         libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))    
                         libtcod.console_put_char(map_console, x, y, '+', libtcod.BKGND_NONE)
+                    elif grass:
+                        libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
+                        libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(240))
                     else:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET) <-- Solid background
                         libtcod.console_set_default_foreground(map_console, colors.get('dark_ground'))
