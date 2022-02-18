@@ -88,6 +88,11 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                 trwall = game_map.tiles[x][y].trwall
                 tlwall = game_map.tiles[x][y].tlwall
 
+                if game_map.tiles[x][y].style:
+                    testwall = game_map.tiles[x][y]
+                else:
+                    testwall = None
+
                 door = game_map.tiles[x][y].door
                 grass = game_map.tiles[x][y].grass
                 floor = game_map.tiles[x][y].floor
@@ -100,6 +105,10 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                     libtcod.console_set_char_background(map_console, x, y, libtcod.light_red, libtcod.BKGND_SET)
                 if debug2:
                     libtcod.console_set_char_background(map_console, x, y, libtcod.light_green, libtcod.BKGND_SET)
+                if testwall:
+                    libtcod.console_set_default_foreground(map_console, testwall.tilestyle["charcol"])
+                    libtcod.console_set_char_background(map_console, x, y, testwall.tilestyle["backcol"], libtcod.BKGND_SET)
+                    libtcod.console_put_char(map_console, x, y, testwall.tilestyle["char"], libtcod.BKGND_NONE)
                 if visible:             #If it's visible (in the fov), draw it
                     if wall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))

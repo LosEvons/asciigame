@@ -8,6 +8,7 @@ from game_messages import Message
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 from random import randint, choice
+from map_objects.tilestyle import TileStyle
 import tcod as libtcod
 from entity import Entity
 from render_functions import RenderOrder
@@ -16,9 +17,6 @@ from item_functions import cast_confusion, cast_fireball, cast_lightning, heal
 from components.stairs import Stairs
 from random_utils import from_dungeon_level, random_choice_from_dict
 from components.name import Name, name_from_parts
-"""
-This is used to generate the game map.
-"""
 
 class GameMap:
     def __init__(self, width, height, dungeon_level=1):
@@ -203,7 +201,8 @@ class GameMap:
                     if key in ("top", "bottom"):
                         self.tiles[tile[0]][tile[1]].blocked = True
                         self.tiles[tile[0]][tile[1]].block_sight = True
-                        self.tiles[tile[0]][tile[1]].hwall = True
+                        #self.tiles[tile[0]][tile[1]].hwall = True
+                        self.tiles[tile[0]][tile[1]].style = TileStyle.WALL
                     if key in ("left", "right"):
                         self.tiles[tile[0]][tile[1]].blocked = True
                         self.tiles[tile[0]][tile[1]].block_sight = True
