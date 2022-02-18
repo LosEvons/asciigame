@@ -201,10 +201,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                 if target:
                     if target.friendly:
                         if target not in player.followers:
-                            talk_results = player.fighter.talk_with(target)
+                            talk_results = player.fighter.ask_along(target)
                             player_turn_results.extend(talk_results)
                         else:
                             player.move(dx, dy)
+                    elif target.neutral:
+                        pass
                     else:
                         attack_results = player.fighter.attack(target)
                         player_turn_results.extend(attack_results)

@@ -84,7 +84,7 @@ class Fighter:
         
         return results
     
-    def talk_with(self, target):
+    def ask_along(self, target):
         results = []
         ai_component = PartyMember(self.owner)
 

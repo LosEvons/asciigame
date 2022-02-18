@@ -7,7 +7,7 @@ from equipment_slots import EquipmentSlots
 from game_messages import Message
 from map_objects.tile import Tile
 from map_objects.rectangle import Rect
-from random import randint, choice
+from random import randint, choice, getrandbits
 import tcod as libtcod
 from entity import Entity
 from render_functions import RenderOrder
@@ -123,7 +123,10 @@ class GameMap:
 
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, 
-        player, entities, name_list, name_part_list, cursor):
+        player, entities, name_list, name_part_list, cursor, cavern):
+        if cavern:
+            self.make_cavern_map(map_width, map_height, player, entities, name_list, name_part_list, cursor)
+
         rooms = [] #Array of all the rooms and their properties. Appaerntly in the form: (anchor_x, anchor_y, size_x, size_y)
         num_rooms = 0
 
@@ -173,13 +176,22 @@ class GameMap:
             stairs=stairs_component)
         entities.append(down_stairs)
 
+        for x in range(self.width):
+            for y in range(self.height):
+                if self.tiles[x][y].blocked:
+                    neighbours = self.get_adjacent_tiles(x, y)
+                    for neighbour in neighbours.values():
+                        if neighbour.blocked == False:
+                            self.tiles[x][y].wall = True
+
     def next_floor(self, player, message_log, constants, name_list, name_part_list, cursor):
         self.dungeon_level += 1
         entities = [player, cursor]
+        cavern = bool(getrandbits(1))
 
         self.tiles = self.initialize_tiles()
         self.make_map(constants["max_rooms"], constants["room_min_size"], constants["room_max_size"],
-            constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor)
+            constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor, cavern)
         
         player.fighter.heal(player.fighter.max_hp // 2)
 
@@ -281,9 +293,11 @@ class GameMap:
 
     def place_entities(self, room, entities, name_list, name_part_list, player): #Randomly decides a place in the room for our monsters
         max_monsters_per_room = from_dungeon_level([[1, 1], [3, 4], [5, 6]], self.dungeon_level)
-        max_items_per_room = from_dungeon_level([[2, 1], [2, 4]], self.dungeon_level)
+        max_items_per_room = from_dungeon_level([[1, 1], [2, 4]], self.dungeon_level)
+        max_npc_per_room = 1
         number_of_monsters = randint(0, max_monsters_per_room) #Set the number of monsters for the current room
         number_of_items = randint(0, max_items_per_room)
+        number_of_npc = randint(0, max_npc_per_room)
 
         monster_chances = {
             "hound":from_dungeon_level([[10, 1],[80, 2], [50, 3], [10, 4], [0, 5]], self.dungeon_level),
@@ -293,7 +307,7 @@ class GameMap:
         
         npc_chances = {
             "party_member":from_dungeon_level([[1, 1], [5, 2], [3, 3], [1, 4]], self.dungeon_level),
-            "party_member":from_dungeon_level([[1, 1], [5, 2], [3, 3], [1, 4]], self.dungeon_level)
+            "npc":from_dungeon_level([[1, 1], [5, 2], [3, 3], [1, 4]], self.dungeon_level)
             }
 
         item_chances = {
@@ -341,19 +355,26 @@ class GameMap:
                 entities.append(monster) #Add the monster to our list of entities
                 self.unique_id += 1 #Give every monster a unique id. Might come in clutch later.
 
-        x = randint(room.x1 + 1, room.x2 - 2)
-        y = randint(room.y1 + 1, room.y2 - 2)
+        for i in range(number_of_npc):
+            x = randint(room.x1 + 1, room.x2 - 2)
+            y = randint(room.y1 + 1, room.y2 - 2)
 
-        if not any ([entity for entity in entities if entity.x == x and entity.y == y]): #Let's not stack multiple entities on the same tile
-            npc_choice = random_choice_from_dict(npc_chances)
+            if not any ([entity for entity in entities if entity.x == x and entity.y == y]):
+                npc_choice = random_choice_from_dict(npc_chances)
 
-            if npc_choice == "party_member":
-                ai_component = PassiveNPC()
-                fighter_component = Fighter(character_sheet=CharacterSheet(14, 14, 14, 14, 14, 14))
-                party_member = Entity(x, y, 'Q', libtcod.dark_red, name_from_parts(name_part_list), blocks=True,
-                    render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component, friendly=True)
-
-                entities.append(party_member)
+                if npc_choice == "party_member":
+                    ai_component = PassiveNPC()
+                    fighter_component = Fighter(character_sheet=CharacterSheet(14, 14, 14, 14, 14, 14))
+                    party_member = Entity(x, y, 'Q', libtcod.dark_red, name_from_parts(name_part_list), blocks=True,
+                        render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component, friendly=True)
+                    entities.append(party_member)
+                
+                elif npc_choice == "npc":
+                    ai_component = PassiveNPC()
+                    npc = Entity(x, y, '&', libtcod.darker_red, name_from_parts(name_part_list), blocks=True,
+                        render_order=RenderOrder.ACTOR, ai=ai_component, neutral=True)
+                    entities.append(npc)
+                    
     
         for i in range(number_of_items):
             x = randint(room.x1 + 1, room.x2 - 2)
@@ -459,5 +480,4 @@ class GameMap:
                 if sample > 0.5:
                     self.tiles[x][y].blocked = False
                     self.tiles[x][y].block_sight = False
-                    self.tiles[x][y].debug = True
 
