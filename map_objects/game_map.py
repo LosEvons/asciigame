@@ -56,8 +56,9 @@ class GameMap:
         return adjacent_tiles
     
     def make_surface_map(self, max_buildings, building_min_size, building_max_size, map_width, map_height,
-        player, entities, name_list, name_part_list, cursor):
+        tree_max_size, tree_min_size, max_trees, min_trees, player, entities, name_list, name_part_list, cursor):
         buildings = []
+        trees = []
         num_buildings = 0
 
         center_of_last_room_x = None
@@ -94,15 +95,25 @@ class GameMap:
                 self.place_entities(new_building, entities, name_list, name_part_list, player)
                 buildings.append(new_building)
                 num_buildings += 1
-        
-        #Attempt at fixing rooms not having doors
-        shared_tiles = []
-        for building in buildings:
-            for othr_bldn in buildings:
-                if building != othr_bldn and building.intersect(othr_bldn):
-                    shared_tiles.append(building.get_shared_tiles(othr_bldn))
-        
-        print(shared_tiles)
+
+        for t in range(max_trees):
+            w = randint(tree_min_size, tree_max_size)
+            h = w
+            x = randint(0, map_width - w - 2)
+            y = randint(0, map_height - h - 2)
+
+            new_tree = Rect(x, y, w, h)
+
+            for other_tree in trees:
+                if new_tree.intersect(other_tree):
+                    break
+            else:
+                for building in buildings:
+                    if new_tree.intersect(building):
+                        break
+                else:
+                    self.create_tree(new_tree)
+                    trees.append(new_tree)
             
         stairs_component = Stairs(self.dungeon_level +1)
         down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, 
@@ -244,6 +255,23 @@ class GameMap:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+    
+    def create_tree(self, area):
+        for x in range(area.x1 - (area.x2-area.x1), area.x2 + (area.x2-area.x1)):
+                for y in range(area.y1 - (area.y2-area.y1), area.y2 + (area.y2 - area.y1)):
+                    if x in range(self.width) and y in range(self.height) and self.tiles[x][y].blocked == False:
+                        self.tiles[x][y].shade = True
+                        self.tiles[x][y].grass = False
+
+        for x in range(area.x1, area.x2):
+            for y in range(area.y1, area.y2):
+                self.tiles[x][y].blocked = True
+                self.tiles[x][y].block_sight = True
+                self.tiles[x][y].tree = True
+                self.tiles[x][y].shade = False
+                self.tiles[x][y].grass = False
+        
+        
 
     def is_blocked(self, x, y): #Checks if the tile we are currently looking at has blocking set to True
         if self.tiles[x][y].blocked:

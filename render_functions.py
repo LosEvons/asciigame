@@ -91,6 +91,8 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                 door = game_map.tiles[x][y].door
                 grass = game_map.tiles[x][y].grass
                 floor = game_map.tiles[x][y].floor
+                tree = game_map.tiles[x][y].tree
+                shade = game_map.tiles[x][y].shade
 
                 debug = game_map.tiles[x][y].debug
                 debug2 = game_map.tiles[x][y].debug2
@@ -134,6 +136,14 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                         libtcod.console_set_default_foreground(map_console, libtcod.dark_green)
                         libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
                         libtcod.console_set_char_background(map_console, x, y, libtcod.darker_green, libtcod.BKGND_ALPHA(230))
+                    elif tree:
+                        libtcod.console_set_default_foreground(map_console, libtcod.dark_orange)
+                        libtcod.console_put_char(map_console, x, y, 'O', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.dark_orange, libtcod.BKGND_ALPHA(230))
+                    elif shade:
+                        libtcod.console_set_default_foreground(map_console, libtcod.darker_gray)
+                        libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(100))
                     elif floor:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_ground'))
                         libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
@@ -170,6 +180,14 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                     elif grass:
                         libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
                         libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(240))
+                    elif tree:
+                        libtcod.console_set_default_foreground(map_console, libtcod.dark_orange)
+                        libtcod.console_put_char(map_console, x, y, 'O', libtcod.BKGND_NONE)
+                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_orange, libtcod.BKGND_ALPHA(240))
+                    elif grass:
+                        libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
+                        libtcod.console_put_char(map_console, x, y, 177, libtcod.BKGND_NONE)
                         libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(240))
                     else:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET) <-- Solid background

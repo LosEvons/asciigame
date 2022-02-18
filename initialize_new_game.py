@@ -39,7 +39,8 @@ def get_game_variables(constants):
 
     game_map = GameMap(constants["map_width"], constants["map_height"]) #Initialize the game map
     game_map.make_surface_map(constants["max_buildings"], constants["building_min_size"], constants["building_max_size"],
-        constants["map_width"], constants["map_height"], player, entities, name_list, name_part_list, cursor)
+        constants["map_width"], constants["map_height"], constants["tree_max_size"], constants["tree_min_size"],
+        constants["max_trees"], constants["min_trees"], player, entities, name_list, name_part_list, cursor)
 
     message_log = MessageLog(constants["message_x"], constants["message_width"], constants["message_height"])
 
@@ -77,6 +78,11 @@ def get_constants():
     building_min_size = 6
     max_buildings = 10
 
+    tree_max_size = 3
+    tree_min_size = 1
+    max_trees = 30
+    min_trees = 20
+
     fov_algorithm = 0
     fov_light_walls = True
     fov_radius = 10
@@ -112,7 +118,11 @@ def get_constants():
         "map_height":map_height,                        #
         "room_max_size":room_max_size,                  #Potential size of generated rooms
         "room_min_size":room_min_size,                  #
-        "max_rooms":max_room,                            #Max rooms to be generated
+        "max_rooms":max_room,                           #Max rooms to be generated
+        "tree_max_size":tree_max_size,
+        "tree_min_size":tree_min_size,
+        "max_trees":max_trees,
+        "min_trees":min_trees,
         "fov_algorithm":fov_algorithm,                  #Determines the fov algorithm used
         "fov_light_walls":fov_light_walls,              #Determines if the fov lights walls
         "fov_radius":fov_radius,                        #Size of FOV
