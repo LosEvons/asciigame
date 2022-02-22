@@ -199,6 +199,12 @@ def handle_player_turn_keys(key):
 
     elif key_char == 't':
         return{"show_stat_screen":True}
+    
+    elif key_char == 'a':
+        return{"lantern_in_use":True}
+    
+    elif key_char == "§":
+        return{"force_next_floor":True}
 
     elif key.vk == libtcod.KEY_SPACE:
         return{"center_map":True}

@@ -1,4 +1,5 @@
 import tcod as libtcod
+import math
 import numpy as np
 from enum import Enum
 from game_state import GameStates
@@ -73,13 +74,16 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
 
 def render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
     screen_height, bar_width, panel_height, panel_x, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
-    draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height, map_x_anchor, map_y_anchor):
-    if fov_recompute:
-        for y in range(game_map.height):        # Draw all the tiles in the game map
-            for x in range(game_map.width):
-                visible = fov_map.fov[y][x]     #Makes an array of all the stuff inside our FOV
+    draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height, map_x_anchor, map_y_anchor, lantern_color_map,
+    lantern_in_use, grass_color_map, stone_color_map):
 
-                #wall = game_map.tiles[x][y].block_sight and game_map.tiles[x][y].blocked #defines a wall
+    if fov_recompute:
+        for y in range(game_map.height):
+            for x in range(game_map.width):
+                libtcod.console_set_char_background(map_console, x, y, libtcod.black)
+
+                visible = fov_map.fov[y][x]
+
                 wall = game_map.tiles[x][y].wall
                 hwall = game_map.tiles[x][y].hwall
                 vwall = game_map.tiles[x][y].vwall
@@ -102,48 +106,59 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                     libtcod.console_set_char_background(map_console, x, y, libtcod.light_green, libtcod.BKGND_SET)
                 if visible:             #If it's visible (in the fov), draw it
                     if wall:
-                        libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        if game_map.tiles[x][y].color:
+                            libtcod.console_set_default_foreground(map_console, game_map.tiles[x][y].color)
+                        else:
+                            from_noise_texture = int((game_map.stone_noise.get_point(x=x, y=y) + 1) * 100)
+                            new_color = stone_color_map[from_noise_texture]
+                            game_map.tiles[x][y].color = new_color
+                            libtcod.console_set_default_foreground(map_console, new_color)
                         libtcod.console_put_char(map_console, x, y, '0', libtcod.BKGND_NONE)
                     elif hwall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                         libtcod.console_put_char(map_console, x, y, 205, libtcod.BKGND_NONE)
                     elif vwall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                         libtcod.console_put_char(map_console, x, y, 186, libtcod.BKGND_NONE)
                     elif brwall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                         libtcod.console_put_char(map_console, x, y, 188, libtcod.BKGND_NONE)
                     elif trwall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                         libtcod.console_put_char(map_console, x, y, 187, libtcod.BKGND_NONE)
                     elif blwall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                         libtcod.console_put_char(map_console, x, y, 200, libtcod.BKGND_NONE)
                     elif tlwall:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_gray, libtcod.BKGND_SET)
                         libtcod.console_put_char(map_console, x, y, 201, libtcod.BKGND_NONE)
                     elif door:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_wall'))
                         libtcod.console_put_char(map_console, x, y, '+', libtcod.BKGND_NONE)
                     elif grass:
-                        libtcod.console_set_default_foreground(map_console, libtcod.dark_green)
-                        libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darker_green, libtcod.BKGND_ALPHA(230))
+                        if game_map.tiles[x][y].color:
+                            libtcod.console_set_default_foreground(map_console, game_map.tiles[x][y].color)
+                        else:
+                            from_noise_texture = int((game_map.grass_noise.get_point(x=x, y=y) + 1) * 100)
+                            new_color = grass_color_map[from_noise_texture]
+                            game_map.tiles[x][y].color = new_color
+                            libtcod.console_set_default_foreground(map_console, new_color)
+                        libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darker_green, libtcod.BKGND_ALPHA(230))
                     elif tree:
                         libtcod.console_set_default_foreground(map_console, libtcod.dark_orange)
                         libtcod.console_put_char(map_console, x, y, 'O', libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.dark_orange, libtcod.BKGND_ALPHA(230))
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.dark_orange, libtcod.BKGND_ALPHA(230))
                     elif shade:
-                        libtcod.console_set_default_foreground(map_console, libtcod.darker_gray)
+                        libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
                         libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(100))
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(100))
                     elif floor:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_ground'))
                         libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
@@ -178,21 +193,30 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                         libtcod.console_set_default_foreground(map_console, colors.get('dark_wall'))    
                         libtcod.console_put_char(map_console, x, y, '+', libtcod.BKGND_NONE)
                     elif grass:
-                        libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
-                        libtcod.console_put_char(map_console, x, y, '"', libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(240))
+                        libtcod.console_set_default_foreground(map_console, game_map.tiles[x][y].color*0.5)
+                        libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(240))
                     elif tree:
                         libtcod.console_set_default_foreground(map_console, libtcod.dark_orange)
                         libtcod.console_put_char(map_console, x, y, 'O', libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_orange, libtcod.BKGND_ALPHA(240))
-                    elif grass:
-                        libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
-                        libtcod.console_put_char(map_console, x, y, 177, libtcod.BKGND_NONE)
-                        libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(240))
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_orange, libtcod.BKGND_ALPHA(240))
+                    elif shade:
+                        libtcod.console_set_default_foreground(map_console, libtcod.darkest_green)
+                        libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
+                        #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(100))
                     else:
                         #libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET) <-- Solid background
                         libtcod.console_set_default_foreground(map_console, colors.get('dark_ground'))
                         libtcod.console_put_char(map_console, x, y, '.', libtcod.BKGND_NONE)
+                
+                if lantern_in_use:
+                    if visible:
+                        if x < game_map.width and y < game_map.height:
+                            dx = x - player.x
+                            dy = y - player.y
+                            distance = math.floor(math.sqrt(dx ** 2 + dy ** 2))
+                            new_color = lantern_color_map[distance]
+                            libtcod.console_set_char_background(map_console, x, y, new_color)
 
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
     

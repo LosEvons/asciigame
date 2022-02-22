@@ -3,8 +3,10 @@ class Tile:
     A tile on a map. Can block movement and sight
     """
     def __init__(self, blocked, block_sight=None, door=None, grass=None, floor=None, wall=False, vwall=False, hwall=False, 
-        tlwall=None, trwall=None, brwall=None, blwall=None, debug=None, debug2=None, tree=None, shade=None):
+        tlwall=None, trwall=None, brwall=None, blwall=None, debug=None, debug2=None, tree=None, shade=None, color=None):
+        
         self.blocked = blocked
+        self.color = color
         self.debug = debug
         self.debug2 = debug2
 

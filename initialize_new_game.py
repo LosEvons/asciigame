@@ -99,6 +99,17 @@ def get_constants():
        'light_ground': libtcod.Color(100, 100, 100)
        }
 
+    key_color = [libtcod.dark_orange, libtcod.darkest_orange, libtcod.black]
+    key_index = [0, int(fov_radius/2), fov_radius+1]
+    lantern_color_map = libtcod.color_gen_map(key_color, key_index)
+
+    key_color = [libtcod.green, libtcod.darker_green]
+    key_index = [0, 200]
+    grass_color_map = libtcod.color_gen_map(key_color, key_index)
+
+    key_color=[libtcod.lightest_gray, libtcod.darker_gray]
+    key_index = [0, 200]
+    stone_color_map = libtcod.color_gen_map(key_color, key_index)
     
     constants = {
         "window_title":window_title,                    #Game window title
@@ -132,7 +143,10 @@ def get_constants():
         "name_part_list":name_part_list,
         "building_max_size":building_max_size,
         "building_min_size":building_min_size,
-        "max_buildings":max_buildings
+        "max_buildings":max_buildings,
+        "lantern_color_map":lantern_color_map,
+        "grass_color_map":grass_color_map,
+        "stone_color_map":stone_color_map
     }
 
     return constants

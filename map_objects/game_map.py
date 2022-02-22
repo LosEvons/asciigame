@@ -27,6 +27,20 @@ class GameMap:
         self.tiles = self.initialize_tiles()
         self.unique_id = 0
         self.dungeon_level = dungeon_level
+        self.grass_noise = libtcod.noise.Noise(
+                                            dimensions=2,
+                                            algorithm=libtcod.noise.Algorithm.WAVELET,
+                                            implementation=1,
+                                            hurst=0.9,
+                                            lacunarity=2
+                                            )
+        self.stone_noise = libtcod.noise.Noise(
+                                            dimensions=2,
+                                            algorithm=libtcod.noise.Algorithm.PERLIN,
+                                            implementation=1,
+                                            hurst=0.9,
+                                            lacunarity=0.4
+                                            )
 
     def initialize_tiles(self): #Creates a coordinate system of every tile. By default blocking and vision blocking is set to True.
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
@@ -480,4 +494,6 @@ class GameMap:
                 if sample > 0.5:
                     self.tiles[x][y].blocked = False
                     self.tiles[x][y].block_sight = False
+
+
 

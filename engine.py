@@ -65,7 +65,7 @@ def main():
                 message_box(con, "No save game to load", 50, constants["screen_width"], constants["screen_height"])
 
             libtcod.console_flush()
-
+            
             action = handle_main_menu(key)
 
             new_game = action.get("new_game")
@@ -109,6 +109,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
     draw_eqp_screen = False
     analyzed_entity = None
     draw_stat_screen = False
+    lantern_in_use = False
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
@@ -117,7 +118,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
 
         render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
             constants["bar_width"], constants["panel_height"], constants["panel_x"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
-            draw_entity_screen, draw_eqp_screen, draw_stat_screen, constants["sidebar_width"], constants["sidebar_height"], map_x_anchor, map_y_anchor)
+            draw_entity_screen, draw_eqp_screen, draw_stat_screen, constants["sidebar_width"], constants["sidebar_height"], map_x_anchor, map_y_anchor, constants["lantern_color_map"], 
+            lantern_in_use, constants["grass_color_map"], constants["stone_color_map"])
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(map_console, entities)
@@ -147,7 +149,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
         show_eqp_screen = action.get("show_eqp_screen")
         show_stat_screen = action.get("show_stat_screen")
         center_map = action.get("center_map")
-        
+        lantern = action.get("lantern_in_use")
+        force_next_floor = action.get("force_next_floor")
+
         left_click = mouse_action.get("left_click")
         right_click = mouse_action.get("right_click")
 
@@ -173,7 +177,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                 draw_stat_screen = False
             else:
                 draw_stat_screen = True
-
+        
+        if lantern:
+            if lantern_in_use:
+                lantern_in_use = False
+            else:
+                lantern_in_use = True
 
         if look:
             previous_game_state = game_state
@@ -317,6 +326,14 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
             else:
                 message_log.add_message(Message("There are no stairs here.", libtcod.yellow))
 
+        if force_next_floor:
+            map_x_anchor = 0
+            map_y_anchor = 0
+            entities = game_map.next_floor(player, message_log, constants, name_list, name_part_list, cursor)
+            fov_map = initialize_fov(game_map)
+            fov_recompute = True
+            libtcod.console_clear(map_console)
+
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
@@ -417,7 +434,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                             message_log.add_message(message)
 
                 if game_state == GameStates.PLAYER_DEAD: #Apparently you need two of these here. Haven't bothered to investigate why, Probably to my own cost.
-                    break            
+                    break
             if game_state == GameStates.PLAYER_DEAD:
                 break
 
