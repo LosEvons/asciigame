@@ -23,16 +23,13 @@ def get_names_under_mouse(mouse, entities, fov_map, cursor,): #Displays the name
 
     return names.capitalize()
 
-def render_sidebar(sidebar):
+def render_sidebar(sidebar, player):
     sidebar.draw_frame(0, 0, sidebar.width, sidebar.height, fg=libtcod.white)
-    y = 1
-    for i in range(6):
-        libtcod.console_set_default_background(sidebar, libtcod.gray)
-        libtcod.console_rect(sidebar, 1, y, sidebar.width - 2, 8, False, libtcod.BKGND_SCREEN)
-        y += 9
-
-    libtcod.console_set_default_background(sidebar, libtcod.gray)
-    libtcod.console_rect(sidebar, 1, sidebar.height - 9, sidebar.width - 2, 8, False, libtcod.BKGND_SCREEN)
+    bar_height = int(player.equipment.fuel / player.equipment.bodyparts["waist"].equippable.max_fuel * (sidebar.height-2))
+    y = sidebar.height - bar_height - 1
+    libtcod.console_set_default_background(sidebar, libtcod.darkest_orange)
+    if bar_height > 0:
+        libtcod.console_rect(sidebar, 1, y, sidebar.width-2, bar_height, False, libtcod.BKGND_SCREEN)
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, game_map): #Render the HP bar
     panel.draw_frame(0, 0, panel.width, panel.height, fg=libtcod.white)
@@ -216,7 +213,7 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                             dy = y - player.y
                             distance = math.floor(math.sqrt(dx ** 2 + dy ** 2))
                             new_color = lantern_color_map[distance]
-                            libtcod.console_set_char_background(map_console, x, y, new_color)
+                            libtcod.console_set_char_background(map_console, x, y, new_color, libtcod.BKGND_ALPHA(100))
 
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
     
@@ -229,8 +226,9 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
 
     libtcod.console_set_default_background(panel, libtcod.black)#Sets the UI background as black
     libtcod.console_clear(panel) #Clears UI before drawing it again
+    libtcod.console_clear(sidebar)
 
-    render_sidebar(sidebar)
+    render_sidebar(sidebar, player)
 
     render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
         libtcod.light_red, libtcod.darker_grey, game_map) #Draws the hp bar

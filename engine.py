@@ -113,7 +113,13 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
 
     while not libtcod.console_is_window_closed(): #Main loop
         if fov_recompute: #Recomputes fov if needed
-            recompute_fov(fov_map, player.x, player.y, constants["fov_radius"], constants["fov_light_walls"], constants["fov_algorithm"])
+            if game_map.dungeon_level > 1:
+                if lantern_in_use:
+                    recompute_fov(fov_map, player.x, player.y, constants["fov_radius"], constants["fov_light_walls"], constants["fov_algorithm"])
+                else:
+                    recompute_fov(fov_map, player.x, player.y, 2, constants["fov_light_walls"], constants["fov_algorithm"])
+            else:
+                recompute_fov(fov_map, player.x, player.y, constants["fov_radius"], constants["fov_light_walls"], constants["fov_algorithm"])
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse) #Check for keypresses
 
         render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
@@ -178,11 +184,17 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
             else:
                 draw_stat_screen = True
         
+        if lantern_in_use and player.equipment.fuel <= 0:
+            lantern_in_use = False
+            message_log.add_message(Message("You are out of fuel!", libtcod.yellow))
         if lantern:
             if lantern_in_use:
                 lantern_in_use = False
-            else:
+            elif player.equipment.fuel > 0:
                 lantern_in_use = True
+            else:
+                message_log.add_message(Message("You are out of fuel!", libtcod.yellow))
+
 
         if look:
             previous_game_state = game_state
@@ -307,7 +319,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                 draw_char_screen = False
             else:
                 draw_char_screen = True
-        
+    
         if message_archive:
             previous_game_state = game_state
             game_state = GameStates.MESSAGE_ARCHIVE
@@ -371,7 +383,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                 if dead_entity == player:
                     message, game_state = kill_player(dead_entity)
                 else:
-                    message = kill_monster(dead_entity)
+                    message, added_fuel = kill_monster(dead_entity)
+                    incoming_fuel = player.equipment.bodyparts["waist"].equippable.fuel + added_fuel
+                    if incoming_fuel >= player.equipment.bodyparts["waist"].equippable.max_fuel:
+                        player.equipment.bodyparts["waist"].equippable.fuel = player.equipment.bodyparts["waist"].equippable.max_fuel
+                    else:
+                        player.equipment.bodyparts["waist"].equippable.fuel += added_fuel
                 message_log.add_message(message)
 
             if item_added:
@@ -415,6 +432,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
 
         #Enemy turn logic
         if game_state == GameStates.ENEMY_TURN:
+            if lantern_in_use and player.equipment.bodyparts["waist"].equippable.fuel and player.equipment.bodyparts["waist"].equippable.fuel > 0:
+                player.equipment.bodyparts["waist"].equippable.fuel -= 1
             for entity in entities:
                 if entity.ai:
                     enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities) #Enemy takes their turn

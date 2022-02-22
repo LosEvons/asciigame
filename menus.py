@@ -75,6 +75,9 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
                     elif item.equippable.ac_bonus or item.equippable.max_hp_bonus:
                         handled_items.append(item)
                         options.append("{} +{}AC&+{}HP (in {})".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus, key))
+                    elif item.equippable.fuel:
+                        handled_items.append(item)
+                        options.append("{} {}/{} FUEL (in {})".format(item.name, item.equippable.fuel, item.equippable.fuel, key))
 
             if item not in handled_items and item.equippable:
                 if item.equippable.damage_dice:
@@ -83,6 +86,9 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
                 elif item.equippable.ac_bonus or item.equippable.max_hp_bonus:
                     handled_items.append(item)
                     options.append("{} +{}AC&+{}HP".format(item.name, item.equippable.ac_bonus, item.equippable.max_hp_bonus))
+                elif item.equippable.fuel:
+                    handled_items.append(item)
+                    options.append("{} {}/{} FUEL".format(item.name, item.equippable.fuel, item.equippable.fuel))
             
             elif item not in handled_items:
                 handled_items.append(item)

@@ -37,6 +37,15 @@ class Equipment():
                 damage_bonus += value.equippable.damage_bonus
 
         return damage_bonus
+    
+    @property
+    def fuel(self):
+        fuel = 0
+        for key, value in self.bodyparts.items():
+            if value and value.equippable and value.equippable.fuel:
+                fuel += value.equippable.fuel
+        
+        return fuel
 
     def toggle_equip(self, equippable_entity):
         

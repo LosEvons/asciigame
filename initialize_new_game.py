@@ -6,6 +6,7 @@ import json
 
 from entity import Entity
 from components.fighter import Fighter
+from components.item import Item
 from components.equipment import Equipment
 from game_messages import MessageLog
 from game_state import GameStates
@@ -31,8 +32,14 @@ def get_game_variables(constants):
     
     equipment_component = Equippable(EquipmentSlots.MAIN_HAND, damage_dice=(2, 4), damage_bonus=1)
     dagger = Entity(0, 0, '-', libtcod.sky, "Dagger", equippable=equipment_component)
+
+    equipment_component = Equippable(EquipmentSlots.WAIST, fuel=100)
+    lantern = Entity(0, 0, '8', libtcod.light_orange, "Lantern", equippable=equipment_component)
+
     player.inventory.add_items(dagger)
+    player.inventory.add_items(lantern)
     player.equipment.toggle_equip(dagger)
+    player.equipment.toggle_equip(lantern)
 
     name_list = constants["name_list"]
     name_part_list = constants["name_part_list"]
@@ -107,8 +114,8 @@ def get_constants():
     key_index = [0, 200]
     grass_color_map = libtcod.color_gen_map(key_color, key_index)
 
-    key_color=[libtcod.lightest_gray, libtcod.darker_gray]
-    key_index = [0, 200]
+    key_color=[libtcod.lightest_gray, libtcod.dark_grey, libtcod.dark_sepia]
+    key_index = [0, 196, 200]
     stone_color_map = libtcod.color_gen_map(key_color, key_index)
     
     constants = {
