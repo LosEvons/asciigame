@@ -16,15 +16,24 @@ from initialize_new_game import get_constants, get_game_variables
 from data_loaders import save_game, load_game
 from menus import main_menu, message_box
 from random_utils import roll
+import pygame
 
 DATA_FOLDER = "data"
 FONT_FILE = os.path.join(DATA_FOLDER, "arial10x10.png") #Font/tileset
 #TILE_FILE = os.path.join(DATA_FOLDER, "arial10x10.png")
 BACKGROUND_FILE = os.path.join(DATA_FOLDER, "bground.jpg")
 
+MYSTERY_ALERT = os.path.join(DATA_FOLDER, "mystery_alert.wav")
+SURFACE_AMBIENCE = os.path.join(DATA_FOLDER, "surface_ambience.wav")
+
 
 def main():
-    print("#############################################")
+    pygame.mixer.init()
+
+    #Sounds
+    mystery_alert = pygame.mixer.Sound(MYSTERY_ALERT)
+    surface_ambience = pygame.mixer.Sound(SURFACE_AMBIENCE)
+    
     constants = get_constants()
         
     libtcod.console_set_custom_font(FONT_FILE, libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD) #Configuring the font
@@ -89,11 +98,12 @@ def main():
         else:
             libtcod.console_clear(map_console)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, map_console, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list)
+                con, map_console, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list, surface_ambience)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, map_console, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list):
+def play_game(player, entities, game_map, message_log, game_state, con, map_console, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list,
+    surface_ambience):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
     key = libtcod.Key() #See if a key is pressed
@@ -111,7 +121,11 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
     draw_stat_screen = False
     lantern_in_use = False
 
+    surface_ambience.play(loops=-1)
+
     while not libtcod.console_is_window_closed(): #Main loop
+        if game_map.dungeon_level > 1:
+            surface_ambience.stop()
         if fov_recompute: #Recomputes fov if needed
             if game_map.dungeon_level > 1:
                 if lantern_in_use:

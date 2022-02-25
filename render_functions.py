@@ -46,6 +46,8 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     libtcod.console_print_ex(panel, int(x + total_width/2), y, libtcod.BKGND_NONE, #Defines the hp indication text
         libtcod.CENTER, "{}: {}/{}".format(name, value, maximum))
 
+    
+
 def render_enemy_bar(entities, fov_map, game_map, other_bars):
     bar_background = "----------"
     other_bars.draw_frame(0, 0, other_bars.width, other_bars.height)
@@ -146,7 +148,7 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                             new_color = grass_color_map[from_noise_texture]
                             game_map.tiles[x][y].color = new_color
                             libtcod.console_set_default_foreground(map_console, new_color)
-                        libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
+                        libtcod.console_put_char(map_console, x, y, 178, libtcod.BKGND_NONE)
                         #libtcod.console_set_char_background(map_console, x, y, libtcod.darker_green, libtcod.BKGND_ALPHA(230))
                     elif tree:
                         libtcod.console_set_default_foreground(map_console, libtcod.dark_orange)
@@ -154,7 +156,7 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
                         #libtcod.console_set_char_background(map_console, x, y, libtcod.dark_orange, libtcod.BKGND_ALPHA(230))
                     elif shade:
                         libtcod.console_set_default_foreground(map_console, libtcod.darker_green)
-                        libtcod.console_put_char(map_console, x, y, 176, libtcod.BKGND_NONE)
+                        libtcod.console_put_char(map_console, x, y, 177, libtcod.BKGND_NONE)
                         #libtcod.console_set_char_background(map_console, x, y, libtcod.darkest_green, libtcod.BKGND_ALPHA(100))
                     elif floor:
                         libtcod.console_set_default_foreground(map_console, colors.get('light_ground'))
