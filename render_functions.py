@@ -31,9 +31,16 @@ def render_sidebar(sidebar, player):
     if bar_height > 0:
         libtcod.console_rect(sidebar, 1, y, sidebar.width-2, bar_height, False, libtcod.BKGND_SCREEN)
 
-def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, game_map): #Render the HP bar
-    panel.draw_frame(0, 0, panel.width, panel.height, fg=libtcod.white)
-    panel.print_box(panel.width//2, 0, 34, 1, " Dungeon Level {} ".format(game_map.dungeon_level))
+def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, game_map,
+    utility_window_width, utility_window_active=False):
+
+    if utility_window_active:
+        panel_width = panel.width - utility_window_width
+    else:
+        panel_width = panel.width
+
+    panel.draw_frame(0, 0, panel_width, panel.height, fg=libtcod.white)
+    panel.print_box(panel_width//2, 0, 34, 1, " Dungeon Level {} ".format(game_map.dungeon_level))
     bar_width = int(float(value) / maximum * total_width) #Define how long the hp bar should be
 
     libtcod.console_set_default_background(panel, back_color)
@@ -45,9 +52,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     libtcod.console_set_default_foreground(panel, libtcod.white) 
     libtcod.console_print_ex(panel, int(x + total_width/2), y, libtcod.BKGND_NONE, #Defines the hp indication text
         libtcod.CENTER, "{}: {}/{}".format(name, value, maximum))
-
-    
-
+            
 def render_enemy_bar(entities, fov_map, game_map, other_bars):
     bar_background = "----------"
     other_bars.draw_frame(0, 0, other_bars.width, other_bars.height)
@@ -74,7 +79,7 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
 def render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
     screen_height, bar_width, panel_height, panel_x, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
     draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height, map_x_anchor, map_y_anchor, lantern_color_map,
-    lantern_in_use, grass_color_map, stone_color_map):
+    lantern_in_use, grass_color_map, stone_color_map, utility_window_width):
 
     if fov_recompute:
         for y in range(game_map.height):
@@ -232,8 +237,12 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
 
     render_sidebar(sidebar, player)
 
-    render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
-        libtcod.light_red, libtcod.darker_grey, game_map) #Draws the hp bar
+    if any([draw_char_screen, draw_entity_screen, draw_eqp_screen, draw_stat_screen]):
+        render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
+            libtcod.light_red, libtcod.darker_grey, game_map, utility_window_width, utility_window_active=True)
+    else:
+        render_bar(panel, 1, 1, bar_width, "HP", player.fighter.hp, player.fighter.max_hp,
+            libtcod.light_red, libtcod.darker_grey, game_map, utility_window_width)
 
     render_enemy_bar(entities, fov_map, game_map, other_bars)
 
@@ -247,9 +256,9 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
         libtcod.console_print_ex(panel, message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
         y += 1
 
-    libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0) #Blit draws stuff onto a hypothetical console. Flushing updates to the newer console.
+    libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
     libtcod.console_blit(map_console, 0, 0, game_map.width, game_map.height, 0, map_x_anchor, map_y_anchor)
-    libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, panel_x, panel_y) #Draws our UI element into the console
+    libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, panel_x, panel_y)
     libtcod.console_blit(other_bars, 0, 0, 30, 30, 0, 15, 0)
     libtcod.console_blit(sidebar, 0, 0, sidebar_width, sidebar_height, 0, 0, 0)
 
@@ -267,23 +276,23 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
             screen_width, screen_height)
 
     if draw_char_screen:
-        character_screen(player, 30, panel_height, screen_width, screen_height)
+        character_screen(player, utility_window_width, panel_height, screen_width, screen_height)
     
     if draw_entity_screen:
         if analyzed_entity.render_order == RenderOrder.CORPSE:
-            fighter_info_screen(player, 30, panel_height, screen_width, screen_height, draw_char_screen)
+            fighter_info_screen(player, utility_window_width, panel_height, screen_width, screen_height, draw_char_screen)
         else:
-            fighter_info_screen(analyzed_entity, 30, panel_height, screen_width, screen_height, draw_char_screen)
+            fighter_info_screen(analyzed_entity, utility_window_width, panel_height, screen_width, screen_height, draw_char_screen)
 
     if game_state == GameStates.MESSAGE_ARCHIVE:
         message_archive_box(con, message_log.message_archive, screen_width, screen_height)
     
     if draw_eqp_screen:
-        equipment_info_screen(player, 30, screen_height, screen_width, screen_height, 
+        equipment_info_screen(player, utility_window_width, screen_height, screen_width, screen_height, 
             draw_entity_screen, draw_char_screen, panel_height)
     
     if draw_stat_screen:
-        stat_info_screen(player, 30, screen_height, screen_width, screen_height, draw_entity_screen, 
+        stat_info_screen(player, utility_window_width, screen_height, screen_width, screen_height, draw_entity_screen, 
             draw_char_screen, draw_eqp_screen, panel_height)
 
 

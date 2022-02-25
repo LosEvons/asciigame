@@ -43,7 +43,7 @@ def main():
 
     con = libtcod.console_new(constants["screen_width"], constants["screen_height"]) #Initializing the game window/console
     map_console = libtcod.console_new(constants["map_width"], constants["map_height"])
-    panel = libtcod.console_new(constants["panel_width"]-30, constants["panel_height"]) #We initialize the UI panel
+    panel = libtcod.console_new(constants["panel_width"], constants["panel_height"]) #We initialize the UI panel
     other_bars = libtcod.console_new(12, 6)
     sidebar = libtcod.console_new(constants["sidebar_width"], constants["sidebar_height"])
 
@@ -139,7 +139,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
         render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
             constants["bar_width"], constants["panel_height"], constants["panel_x"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
             draw_entity_screen, draw_eqp_screen, draw_stat_screen, constants["sidebar_width"], constants["sidebar_height"], map_x_anchor, map_y_anchor, constants["lantern_color_map"], 
-            lantern_in_use, constants["grass_color_map"], constants["stone_color_map"])
+            lantern_in_use, constants["grass_color_map"], constants["stone_color_map"], constants["utility_window_width"])
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(map_console, entities)
@@ -241,7 +241,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                         else:
                             player.move(dx, dy)
                     elif target.neutral:
-                        pass
+                        talk_results = player.fighter.talk_to(target)
+                        player_turn_results.extend(talk_results)
                     else:
                         attack_results = player.fighter.attack(target)
                         player_turn_results.extend(attack_results)

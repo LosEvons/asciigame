@@ -97,3 +97,16 @@ class Fighter:
             results.append({"message":Message("{} is still following you.".format(target.name))})
 
         return results
+    
+    def talk_to(self, target):
+        results = []
+
+        if not self.owner.name:
+            target_name = "stranger"
+        else:
+            target_name = self.owner.name
+
+        results.append({"message":Message("Hello {}. Nice to meet you. I am {}. I am a {} year old {} and I work as a {}.".format(
+            target_name, target.NPC_LORE.name, target.NPC_LORE.age, target.NPC_LORE.sex, target.NPC_LORE.occupation))})
+        
+        return results

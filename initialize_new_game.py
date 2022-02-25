@@ -70,8 +70,10 @@ def get_constants():
     panel_y = screen_height - panel_height
     panel_x = screen_width - panel_width
 
+    utility_window_width = 30
+
     message_x = bar_width + 2
-    message_width = screen_width - bar_width - 2
+    message_width = panel_width - bar_width - 2
     message_height = panel_height - 2
     
     map_width = screen_width
@@ -124,6 +126,7 @@ def get_constants():
         "screen_height":screen_height,                  #
         "sidebar_width":sidebar_width,
         "sidebar_height":sidebar_height,
+        "utility_window_width":utility_window_width,
         "bar_width":bar_width,                          #Health bar size
         "panel_height":panel_height,                    #Size of the UI panel (height and location)
         "panel_width":panel_width,

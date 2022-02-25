@@ -16,6 +16,7 @@ from item_functions import cast_confusion, cast_fireball, cast_lightning, heal
 from components.stairs import Stairs
 from random_utils import from_dungeon_level, random_choice_from_dict
 from components.name import Name, name_from_parts
+from npc_generator import NPC
 """
 This is used to generate the game map.
 """
@@ -385,8 +386,10 @@ class GameMap:
                 
                 elif npc_choice == "npc":
                     ai_component = PassiveNPC()
+                    npc_component = NPC(name=name_from_parts(name_part_list), age=randint(18, 90), sex=choice(["man", "woman"]), 
+                        occupation=choice(["blacksmith", "hunter", "woodworker", "doctor", "sage"]))
                     npc = Entity(x, y, '&', libtcod.darker_red, name_from_parts(name_part_list), blocks=True,
-                        render_order=RenderOrder.ACTOR, ai=ai_component, neutral=True)
+                        render_order=RenderOrder.ACTOR, ai=ai_component, neutral=True, NPC_Lore=npc_component)
                     entities.append(npc)
                     
     

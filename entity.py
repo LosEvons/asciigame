@@ -10,7 +10,7 @@ class Entity:
     def __init__(self, x, y, char, color, name, blocks=False,
         render_order=RenderOrder.CORPSE, fighter=None, ai=None,
         item=None, inventory=None, stairs=None, level=None,
-        equipment=None, equippable=None, friendly=False, followers=None, neutral=None): #Entities do not block or have any ai-script by default
+        equipment=None, equippable=None, friendly=False, followers=None, neutral=None, NPC_Lore=None): #Entities do not block or have any ai-script by default
         
         self.x = x
         self.y = y
@@ -30,6 +30,7 @@ class Entity:
         self.friendly = friendly
         self.neutral = neutral
         self.followers = followers
+        self.NPC_LORE = NPC_Lore
 
         if self.fighter:
             self.fighter.owner = self
@@ -45,6 +46,8 @@ class Entity:
             self.level.owner = self
         if self.equipment:
             self.equipment.owner = self
+        if self.NPC_LORE:
+            self.NPC_LORE.owner = self
         if self.equippable:
             self.equippable.owner = self
             if not self.item:
