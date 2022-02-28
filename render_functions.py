@@ -74,12 +74,20 @@ def render_enemy_bar(entities, fov_map, game_map, other_bars):
                 libtcod.console_print_ex(other_bars, 1, count, libtcod.BKGND_NONE,
                     libtcod.LEFT, hp_str)
                 count += 1
-    
+
+def render_time_bar(entities, fov_map, game_map, time_bar, delta_time):
+    bar_background = "----------"
+    time_bar.draw_frame(0, 0, time_bar.width, time_bar.height)
+    libtcod.console_set_default_background(time_bar, libtcod.black)
+    libtcod.console_set_default_foreground(time_bar, libtcod.grey)
+    for i in range(int(delta_time*20)):
+        if i <= 9:
+            libtcod.console_print_ex(time_bar, i+1, 1, libtcod.BKGND_NONE, libtcod.LEFT, "+")
 
 def render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, 
     screen_height, bar_width, panel_height, panel_x, panel_y, mouse, colors, game_state, cursor, draw_char_screen, analyzed_entity,
     draw_entity_screen, draw_eqp_screen, draw_stat_screen, sidebar_width, sidebar_height, map_x_anchor, map_y_anchor, lantern_color_map,
-    lantern_in_use, grass_color_map, stone_color_map, utility_window_width):
+    lantern_in_use, grass_color_map, stone_color_map, utility_window_width, time_bar, delta_time):
 
     if fov_recompute:
         for y in range(game_map.height):
@@ -246,6 +254,8 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
 
     render_enemy_bar(entities, fov_map, game_map, other_bars)
 
+    render_time_bar(entities, fov_map, game_map, time_bar, delta_time)
+
     libtcod.console_set_default_foreground(panel, libtcod.white)
     libtcod.console_print_ex(panel, 2, 6, libtcod.BKGND_NONE, libtcod.LEFT,  #Draws stuff in the ui when enemy is moused over
         get_names_under_mouse(mouse, entities, fov_map, cursor))
@@ -259,8 +269,9 @@ def render_all(con, map_console, panel, sidebar, other_bars, entities, player, g
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
     libtcod.console_blit(map_console, 0, 0, game_map.width, game_map.height, 0, map_x_anchor, map_y_anchor)
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, panel_x, panel_y)
-    libtcod.console_blit(other_bars, 0, 0, 30, 30, 0, 15, 0)
+    libtcod.console_blit(other_bars, 0, 0, 30, 30, 0, sidebar_width, 0)
     libtcod.console_blit(sidebar, 0, 0, sidebar_width, sidebar_height, 0, 0, 0)
+    libtcod.console_blit(time_bar, 0, 0, 0, 30, 30, sidebar_width, other_bars.height)
 
     inventory_title = None
     if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):

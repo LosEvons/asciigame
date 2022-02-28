@@ -2,6 +2,7 @@
 import sys
 import os
 import numpy as np
+import time
 
 os.environ["path"] = os.path.dirname(sys.executable) + ";" + os.environ["path"] # does shit if you have multiple python versions installed.
 import glob
@@ -45,6 +46,7 @@ def main():
     map_console = libtcod.console_new(constants["map_width"], constants["map_height"])
     panel = libtcod.console_new(constants["panel_width"], constants["panel_height"]) #We initialize the UI panel
     other_bars = libtcod.console_new(12, 6)
+    time_bar = libtcod.console_new(12, 3)
     sidebar = libtcod.console_new(constants["sidebar_width"], constants["sidebar_height"])
 
     player = None
@@ -98,11 +100,11 @@ def main():
         else:
             libtcod.console_clear(map_console)
             play_game(player, entities, game_map, message_log, game_state, 
-                con, map_console, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list, surface_ambience)
+                con, map_console, panel, sidebar, other_bars, time_bar, constants, name_list, cursor, name_part_list, surface_ambience)
             
             show_main_menu = True
 
-def play_game(player, entities, game_map, message_log, game_state, con, map_console, panel, sidebar, other_bars, constants, name_list, cursor, name_part_list,
+def play_game(player, entities, game_map, message_log, game_state, con, map_console, panel, sidebar, other_bars, time_bar, constants, name_list, cursor, name_part_list,
     surface_ambience):
     fov_recompute = True #Do not recompute fov every frame. Just when changes happen.
 
@@ -120,10 +122,20 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
     analyzed_entity = None
     draw_stat_screen = False
     lantern_in_use = False
+    wait_time_cleared = True
 
     surface_ambience.play(loops=-1)
+    start_time = time.time()
+    delta_time = 0
 
     while not libtcod.console_is_window_closed(): #Main loop
+        if delta_time < 0.5:
+            current_time = time.time()
+            delta_time = current_time - start_time
+            print(delta_time)
+        else:
+            wait_time_cleared = True
+
         if game_map.dungeon_level > 1:
             surface_ambience.stop()
         if fov_recompute: #Recomputes fov if needed
@@ -139,14 +151,17 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
         render_all(con, map_console, panel, sidebar, other_bars, entities, player, game_map, fov_map, fov_recompute, message_log, constants["screen_width"], constants["screen_height"], 
             constants["bar_width"], constants["panel_height"], constants["panel_x"], constants["panel_y"], mouse, constants["colors"], game_state, cursor, draw_char_screen, analyzed_entity,
             draw_entity_screen, draw_eqp_screen, draw_stat_screen, constants["sidebar_width"], constants["sidebar_height"], map_x_anchor, map_y_anchor, constants["lantern_color_map"], 
-            lantern_in_use, constants["grass_color_map"], constants["stone_color_map"], constants["utility_window_width"])
+            lantern_in_use, constants["grass_color_map"], constants["stone_color_map"], constants["utility_window_width"], time_bar, delta_time)
         libtcod.console_flush() #Updates to a newer version of the console, where blit has been drawing the new stuff
 
         clear_all(map_console, entities)
 
         #Input handling (using the input_handler.py file)
-        action = handle_keys(key, game_state) 
-        mouse_action = handle_mouse(mouse)
+        if wait_time_cleared:
+            action = handle_keys(key, game_state) 
+            mouse_action = handle_mouse(mouse)
+        else:
+            continue
 
         move = action.get("move")
         wait = action.get("wait")
@@ -473,6 +488,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, map_cons
                 break
 
             else:
+                delta_time = 0
+                start_time = time.time()
+                wait_time_cleared = True
                 game_state = GameStates.PLAYERS_TURN
 
 if __name__ == "__main__":

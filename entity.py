@@ -10,7 +10,8 @@ class Entity:
     def __init__(self, x, y, char, color, name, blocks=False,
         render_order=RenderOrder.CORPSE, fighter=None, ai=None,
         item=None, inventory=None, stairs=None, level=None,
-        equipment=None, equippable=None, friendly=False, followers=None, neutral=None, NPC_Lore=None): #Entities do not block or have any ai-script by default
+        equipment=None, equippable=None, friendly=False, 
+        followers=None, neutral=None, NPC_Lore=None, particle=None): #Entities do not block or have any ai-script by default
         
         self.x = x
         self.y = y
@@ -18,9 +19,9 @@ class Entity:
         self.color = color
         self.name = name
         self.blocks = blocks
-        self.fighter = fighter  #Defines class
-        self.ai = ai #Defines ai script
-        self.render_order = render_order #When is the entity rendered (so things don't disappear under each other so much)
+        self.fighter = fighter
+        self.ai = ai
+        self.render_order = render_order
         self.item = item
         self.inventory = inventory
         self.stairs = stairs
@@ -55,12 +56,12 @@ class Entity:
                 self.item = item
                 self.item.owner = self
 
-    def move(self, dx, dy): #Used to move stuff. Takes a change in coordinates.
+    def move(self, dx, dy):
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map, entities): #Used to move stuff towards a point. 
-        dx = target_x - self.x                                      #Calculates a very simple route to a point, and avoids blocking objects on it's way there.
+    def move_towards(self, target_x, target_y, game_map, entities):
+        dx = target_x - self.x                                      
         dy = target_y - self.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
 
